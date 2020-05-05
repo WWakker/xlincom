@@ -1,0 +1,21 @@
+v 3
+
+d 'MLINCOM': Multiple linear combinations of parameters
+d mlincom computes point estimates, standard errors, t or z statistics, 
+d p-values, and confidence intervals for multiple linear combinations of 
+d coefficients as well as their covariances. nlcom is also able to do 
+d this, but mlincom is much faster (up to 300 times for complex models). 
+d mlincom internally calls lincom for each linear combination and extracts 
+d estimates and variances from its output. It has an optional post option 
+d to post estimation results for subsequent testing or exporting with 
+d pretty table commands. 
+d 
+d Requires: Stata version 8
+d
+d Distribution-Date: 20200505
+d 
+d Author: Wouter Wakker
+d Contact: wouter.wakker@outlook.com
+f mlincom.ado
+f mlincom_p.ado
+f mlincom.sthlp
