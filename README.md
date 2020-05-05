@@ -6,6 +6,7 @@
 ## Installation
 To install, type in Stata:
 ```Stata
+net install mlincom, from(https://raw.githubusercontent.com/WWakker/mlincom/master/) replace
 ```
 
 ## Requirements
