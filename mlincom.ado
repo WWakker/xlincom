@@ -1,4 +1,4 @@
-*! 1.0.0                05may2020
+*! 1.0.1                07may2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 program mlincom, eclass
 	version 8
@@ -150,10 +150,10 @@ program mlincom, eclass
 	// Eform options 
 	if "`eform'" == "" {
 		if "`or'" != "" local eform "Odds Ratio"
-		if "`hr'" != "" local eform "Haz. Ratio"
-		if "`shr'" != "" local eform "SHR"
-		if "`irr'" != "" local eform "IRR"
-		if "`rrr'" != "" local eform "RRR"
+		else if "`hr'" != "" local eform "Haz. Ratio"
+		else if "`shr'" != "" local eform "SHR"
+		else if "`irr'" != "" local eform "IRR"
+		else if "`rrr'" != "" local eform "RRR"
 	}
 	
 	di
