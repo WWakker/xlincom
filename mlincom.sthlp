@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.0  05may2020}{...}
+{* *! version 1.0.1  19may2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
@@ -69,7 +69,7 @@ or subsequent testing. In this case {cmd:mlincom} also calculates covariances by
 makes it about 2 times slower. Since {cmd:mlincom} is intended as a fast alternative to {helpb nlcom:nlcom}
 for linear combinations, the option {opt covzero} may be specified. In this case {cmd:mlincom} does not
 compute covariances, setting them to 0 instead. If covariances are set to zero the estimates of the 
-transformations should not be tested against eachother as that will yield invalid results.
+transformations should not be tested against each other as that will yield invalid results.
 
 
 {marker options}{...}
