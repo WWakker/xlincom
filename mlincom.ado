@@ -1,4 +1,4 @@
-*! 1.0.1                07may2020
+*! 1.0.2                07may2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
 * 1.0.2     09jun2020   proper error code when parentheses found in equation
@@ -213,6 +213,11 @@ end
 
 program mlincom_parse_eq_for_test, sclass
 	version 8
+	gettoken tok rest : 0 , parse("()")
+	if `"`tok'"' != `"`0'"' {
+		di as error "parenthesis not allowed in equation"
+		exit 198
+	}
 	gettoken tok rest : 0 , parse(":")
 	if `"`tok'"' == `"`0'"' local eq `"`0'"'
 	else {
@@ -222,10 +227,6 @@ program mlincom_parse_eq_for_test, sclass
 			if "``=`i'+1''" == ":" local eq `"`eq' [``i'']"'
 			else if "``=`i'-1''" == ":" local eq `"`eq'``i''"'
 			else if !inlist("``i''", ":" , "(", ")") local eq `"`eq' ``i''"'
-			else if inlist("``i''", "(", ")") {
-				di as error "parentheses in equation not allowed"
-				exit 198
-			}
 			local ++i
 		}
 	}
