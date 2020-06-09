@@ -67,6 +67,14 @@ mlincom ((name) mpg) ((name) mpg) (_b[weight] * 2), post covzero
 qui reg price mpg weight
 mlincom ((name) mpg) ((name) mpg) (weight * 2), post 
 
+qui reg price mpg weight
+cap mlincom (mpg * (2+3)) ((name) mpg) (weight * 2), post 
+assert _rc == 198
+
+qui reg price mpg weight
+cap mlincom ((name) mpg * (2+3)) ((name) mpg) (weight * 2), post 
+assert _rc == 198
+
 ** Syntax options
 qui reg price mpg weight
 mlincom (mpg)

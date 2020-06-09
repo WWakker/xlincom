@@ -6,7 +6,6 @@ set matsize 11000
 *************************************************
 
 local iter 100
-cap drop nlcom_xt mlincom_xt nlcom_reg mlincom_reg
 gen nlcom_xt = .
 gen mlincom_xt = .
 gen nlcom_reg = .
@@ -30,7 +29,7 @@ forval i = 1/`iter' {
 		  (_b[i3.incgroup_th#ka_std] + _b[i3.incgroup_th#l.ka_std] + _b[i3.incgroup_th#l2.ka_std] + _b[i3.incgroup_th#l3.ka_std] + _b[i3.incgroup_th#l4.ka_std]) ///
 		  (_b[i4.incgroup_th#ka_std] + _b[i4.incgroup_th#l.ka_std] + _b[i4.incgroup_th#l2.ka_std] + _b[i4.incgroup_th#l3.ka_std] + _b[i4.incgroup_th#l4.ka_std])
 	timer off 2
-	timer list
+	qui timer list
 	
 	qui replace nlcom_xt = `r(t1)' in `i'
 	qui replace mlincom_xt = `r(t2)' in `i'
