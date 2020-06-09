@@ -1,4 +1,4 @@
-*! 1.0.2                07may2020
+*! 1.0.2                09jun2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
 * 1.0.2     09jun2020   proper error code when parentheses found in equation
