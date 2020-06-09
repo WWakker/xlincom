@@ -1,5 +1,10 @@
 *! 1.0.1                07may2020
 *! Wouter Wakker        wouter.wakker@outlook.com
+
+* 1.0.2     09jun2020   proper error code when parentheses found in equation
+* 1.0.1		07may2020   if statements for display options run slightly faster
+* 1.0.0     05may2020   born
+
 program mlincom, eclass
 	version 8
 
@@ -211,12 +216,16 @@ program mlincom_parse_eq_for_test, sclass
 	gettoken tok rest : 0 , parse(":")
 	if `"`tok'"' == `"`0'"' local eq `"`0'"'
 	else {
-		tokenize `"`0'"', parse(" :+-/*")
+		tokenize `"`0'"', parse(" :+-/*()")
 		local i 1
 		while "``i''" != "" {
 			if "``=`i'+1''" == ":" local eq `"`eq' [``i'']"'
 			else if "``=`i'-1''" == ":" local eq `"`eq'``i''"'
-			else if "``i''" != ":" local eq `"`eq' ``i''"'
+			else if !inlist("``i''", ":" , "(", ")") local eq `"`eq' ``i''"'
+			else if inlist("``i''", "(", ")") {
+				di as error "parentheses in equation not allowed"
+				exit 198
+			}
 			local ++i
 		}
 	}
