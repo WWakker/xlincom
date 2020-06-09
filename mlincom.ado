@@ -2,7 +2,7 @@
 *! Wouter Wakker        wouter.wakker@outlook.com
 
 * 1.0.2     09jun2020   proper error code when parentheses found in equation
-* 1.0.1		07may2020   if statements for display options run slightly faster
+* 1.0.1     07may2020   if statements for display options run slightly faster
 * 1.0.0     05may2020   born
 
 program mlincom, eclass
