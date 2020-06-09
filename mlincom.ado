@@ -215,7 +215,7 @@ program mlincom_parse_eq_for_test, sclass
 	version 8
 	gettoken tok rest : 0 , parse("()")
 	if `"`tok'"' != `"`0'"' {
-		di as error "parenthesis not allowed in equation"
+		di as error "parentheses not allowed in equation"
 		exit 198
 	}
 	gettoken tok rest : 0 , parse(":")
