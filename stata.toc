@@ -1,6 +1,6 @@
 v 3
 
-d mlincom
+d xlincom
 d Wouter Wakker
 
-p mlincom multiple linear combinations of parameters
+p xlincom multiple linear combinations of parameters

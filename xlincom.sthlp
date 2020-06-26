@@ -1,31 +1,31 @@
 {smcl}
-{* *! version 1.0.2  09jun2020}{...}
+{* *! version 1.0.3  26jun2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
 {vieweralsosee "[R] test" "help test"}{...}
 {vieweralsosee "[R] testnl" "help testnl"}{...}
-{viewerjumpto "Syntax" "mlincom##syntax"}{...}
-{viewerjumpto "Description" "mlincom##description"}{...}
-{viewerjumpto "Options" "mlincom##options"}{...}
-{viewerjumpto "Examples" "mlincom##examples"}{...}
-{viewerjumpto "Stored results" "mlincom##results"}{...}
-{viewerjumpto "Acknowledgments" "mlincom##acknowledgments"}{...}
-{viewerjumpto "Author" "mlincom##author"}{...}
-{viewerjumpto "See also" "mlincom##see_also"}{...}
+{viewerjumpto "Syntax" "xlincom##syntax"}{...}
+{viewerjumpto "Description" "xlincom##description"}{...}
+{viewerjumpto "Options" "xlincom##options"}{...}
+{viewerjumpto "Examples" "xlincom##examples"}{...}
+{viewerjumpto "Stored results" "xlincom##results"}{...}
+{viewerjumpto "Acknowledgments" "xlincom##acknowledgments"}{...}
+{viewerjumpto "Author" "xlincom##author"}{...}
+{viewerjumpto "See also" "xlincom##see_also"}{...}
 
 
 {title:Title}
 
 {phang}
-{bf:mlincom} {hline 2} Multiple linear combinations of parameters
+{bf:xlincom} {hline 2} Multiple linear combinations of parameters
 
 
 {marker syntax}{...}
 {title:Syntax}
 
 {p 8 16 2}
-{cmd:mlincom} {cmd:(}[({it:name})] {it:{help exp}}{cmd:)} [{cmd:(}[({it:name})] {it:{help exp}}{cmd:)} ...] [{cmd:,} {it:options}]
+{cmd:xlincom} {cmd:(}[({it:name})] {it:{help exp}}{cmd:)} [{cmd:(}[({it:name})] {it:{help exp}}{cmd:)} ...] [{cmd:,} {it:options}]
 
 {synoptset 16}{...}
 {synopthdr}
@@ -48,7 +48,7 @@
 {pstd}
 {it:exp} is any linear combination of coefficients that is valid
 syntax for {helpb lincom:lincom}. The exception is when option {opt post}
-without {opt covzero} is specified, see {helpb mlincom##remarks:remarks}. All linear combinations must 
+without {opt covzero} is specified, see {helpb xlincom##remarks:remarks}. All linear combinations must 
 be contained within parentheses. An optional {it:name} may be specified, within parentheses,
 to label the transformation; {it:name} can be any valid Stata name. 
 
@@ -57,17 +57,17 @@ to label the transformation; {it:name} can be any valid Stata name.
 {title:Description}
 
 {pstd}
-{cmd:mlincom} computes point estimates, standard errors, t or z statistics,
+{cmd:xlincom} computes point estimates, standard errors, t or z statistics,
 p-values, and confidence intervals for multiple linear combinations of coefficients as well as their 
-covariances. {helpb nlcom:nlcom} is also able to do this, but {cmd:mlincom} is much faster 
-(up to 300 times for complex models). {cmd:mlincom} internally calls {helpb lincom:lincom}
+covariances. {helpb nlcom:nlcom} is also able to do this, but {cmd:xlincom} is much faster 
+(up to 300 times for complex models). {cmd:xlincom} internally calls {helpb lincom:lincom}
 for each linear combination and extracts estimates and variances from its output.
 
 {pstd}
 If option {opt post} is specified, estimation results will be posted in {cmd:e()} for exporting to pretty tables
-or subsequent testing. In this case {cmd:mlincom} also calculates covariances by default, but this
-makes it about 2 times slower. Since {cmd:mlincom} is intended as a fast alternative to {helpb nlcom:nlcom}
-for linear combinations, the option {opt covzero} may be specified. In this case {cmd:mlincom} does not
+or subsequent testing. In this case {cmd:xlincom} also calculates covariances by default, but this
+makes it about 2 times slower. Since {cmd:xlincom} is intended as a fast alternative to {helpb nlcom:nlcom}
+for linear combinations, the option {opt covzero} may be specified. In this case {cmd:xlincom} does not
 compute covariances, setting them to 0 instead. If covariances are set to zero the estimates of the 
 transformations should not be tested against each other as that will yield invalid results.
 
@@ -94,10 +94,10 @@ distribution if {cmd:e(df_r)} is missing.
 {phang}
 {opt post} posts estimation results in e() for exporting results to pretty tables
 or testing. The syntax is constrained if this option is specified without {opt covzero},
-see {helpb mlincom##remarks:remarks}.
+see {helpb xlincom##remarks:remarks}.
 
 {phang}
-{opt covzero} causes {cmd:mlincom} to set covariances to zero, which speeds it up
+{opt covzero} causes {cmd:xlincom} to set covariances to zero, which speeds it up
 by about two times, and the syntax will not be constrained. The transformations should
 not be tested against each other if this option is specified as that will yield invalid 
 results. 
@@ -111,9 +111,9 @@ results.
 
 {pstd} 
 If option {opt post} is not specified or {opt post} is specified together with option 
-{opt covzero}, {cmd:mlincom} does not have to calculate covariances, and {cmd:mlincom} will 
+{opt covzero}, {cmd:xlincom} does not have to calculate covariances, and {cmd:xlincom} will 
 accept any syntax that is valid for {helpb lincom:lincom}. However, if covariances need to be
-calculated, {cmd:mlincom} needs to interpret the equations. {cmd:mlincom} has its own parser
+calculated, {cmd:xlincom} needs to interpret the equations. {cmd:xlincom} has its own parser
 to do that, which is not as smart as Stata's inbuilt parser. It will only recognize parameters
 as they are found in {cmd:e(V)}. Type {cmd:matrix list e(V)} after the estimation command to see how
 parameters are named. Furthermore, it will only accept one multiplication or division per 
@@ -136,21 +136,21 @@ or {cmd:mpg / 1.5}.
 {phang2}{cmd:. lincom 3*x1 + 500*x3}{p_end}
 {phang2}{cmd:. lincom 3*x1 + 500*x3 - 12}{p_end}
 
-{pstd}Estimate linear combinations of coefficients with {cmd:mlincom}{p_end}
-{phang2}{cmd:. mlincom (x2-x1) (3*x1 + 500*x3) (3*x1 + 500*x3 - 12)}{p_end}
+{pstd}Estimate linear combinations of coefficients with {cmd:xlincom}{p_end}
+{phang2}{cmd:. xlincom (x2-x1) (3*x1 + 500*x3) (3*x1 + 500*x3 - 12)}{p_end}
 
-{pstd}Estimate linear combinations of coefficients with {cmd:mlincom}, label transformations{p_end}
-{phang2}{cmd:. mlincom ((name1) x2-x1) ((name2) 3*x1 + 500*x3) ((name3) 3*x1 + 500*x3 - 12)}{p_end}
+{pstd}Estimate linear combinations of coefficients with {cmd:xlincom}, label transformations{p_end}
+{phang2}{cmd:. xlincom ((name1) x2-x1) ((name2) 3*x1 + 500*x3) ((name3) 3*x1 + 500*x3 - 12)}{p_end}
 
-{pstd}Estimate linear combinations of coefficients with {cmd:mlincom}, label transformations and post results{p_end}
-{phang2}{cmd:. mlincom ((name1) x2-x1) ((name2) 3*x1 + 500*x3) ((name3) 3*x1 + 500*x3 - 12), post}{p_end}
+{pstd}Estimate linear combinations of coefficients with {cmd:xlincom}, label transformations and post results{p_end}
+{phang2}{cmd:. xlincom ((name1) x2-x1) ((name2) 3*x1 + 500*x3) ((name3) 3*x1 + 500*x3 - 12), post}{p_end}
 
 
 {marker results}{...}
 {title:Stored results}
 
 {pstd}
-{cmd:mlincom} stores the following in {cmd:r()}:
+{cmd:xlincom} stores the following in {cmd:r()}:
 
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2: Scalars}{p_end}
@@ -161,7 +161,7 @@ or {cmd:mpg / 1.5}.
 {p2colreset}{...}
 
 {pstd}
-If option {opt post} is specified, {cmd:mlincom} stores the following in {cmd:e()}:
+If option {opt post} is specified, {cmd:xlincom} stores the following in {cmd:e()}:
 
 {synoptset 15 tabbed}{...}
 {p2col 5 15 19 2: Scalars}{p_end}
@@ -169,8 +169,8 @@ If option {opt post} is specified, {cmd:mlincom} stores the following in {cmd:e(
 {synopt:{cmd:e(df_r)}}degrees of freedom{p_end}
 
 {p2col 5 15 19 2: Macros}{p_end}
-{synopt:{cmd:e(predict)}}mlincom_p{p_end}
-{synopt:{cmd:e(cmd)}}mlincom{p_end}
+{synopt:{cmd:e(predict)}}xlincom_p{p_end}
+{synopt:{cmd:e(cmd)}}xlincom{p_end}
 {synopt:{cmd:e(properties)}}{cmd:b V}{p_end}
 {synopt:{cmd:e(depvar)}}dependent variable{p_end}
 
@@ -187,11 +187,11 @@ If option {opt post} is specified, {cmd:mlincom} stores the following in {cmd:e(
 {title:Acknowledgments}
 
 {pstd} 
-I would like to thank Roger Newson, as some of the code of {cmd:mlincom} 
+I would like to thank Roger Newson, as some of the code of {cmd:xlincom} 
 is based on the code of his command {cmd:lincomest}. 
 
 {pstd}
-Since much of {cmd:mlincom}'s options are the same as {cmd:lincom}'s I have 
+Since much of {cmd:xlincom}'s options are the same as {cmd:lincom}'s I have 
 used information from the help file of {helpb lincom:lincom} while making 
 this help file for consistency and clarity, especially for shared options.
 

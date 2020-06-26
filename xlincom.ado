@@ -1,15 +1,16 @@
-*! 1.0.2                09jun2020
+*! 1.0.3                26jun2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.0.3     26jun2020   name change mlincom --> xlincom
 * 1.0.2     09jun2020   proper error code when parentheses found in equation
 * 1.0.1     07may2020   if statements for display options run slightly faster
 * 1.0.0     05may2020   born
 
-program mlincom, eclass
+program xlincom, eclass
 	version 8
 
 	if replay() {
-		if "`e(cmd)'" != "mlincom" {
+		if "`e(cmd)'" != "xlincom" {
 			error 301
         }
         syntax [, EForm(string) 		   	   ///
@@ -95,13 +96,13 @@ program mlincom, eclass
 		// Start execution
 		local i 1
 		foreach name_eq in `tokens' {
-			mlincom_parse_name_eq `"`name_eq'"' `i'
+			xlincom_parse_name_eq `"`name_eq'"' `i'
 			local eq_names `eq_names' `s(eq_name)'
 			local name `s(eq_name)'
 			local eq `s(eq)'
 			
 			if "`post'" != "" & "`covzero'" == "" {
-				mlincom_parse_eq_for_test `eq'
+				xlincom_parse_eq_for_test `eq'
 				qui lincom `s(eq_for_test)', level(`level') df(`df')
 			}
 			else qui lincom `s(eq)', level(`level') df(`df')
@@ -126,7 +127,7 @@ program mlincom, eclass
 			
 			// Get column vectors for covariance calculations
 			if "`post'" != "" & "`covzero'" == "" {
-				mlincom_get_eq_vector `"`eq'"' `"`rownames'"' `n_eV'
+				xlincom_get_eq_vector `"`eq'"' `"`rownames'"' `n_eV'
 				tempname c`i'
 				mat `c`i'' = r(A)
 			}
@@ -166,8 +167,8 @@ program mlincom, eclass
 	// Display and post results
 	if "`post'" != "" {
 		ereturn post `beta' `vcov' , depname("`depname'") obs(`obs') dof(`dof') esample(`esample')
-		ereturn local cmd "mlincom"
-		ereturn local predict "mlincom_p"
+		ereturn local cmd "xlincom"
+		ereturn local predict "xlincom_p"
 		ereturn display, eform(`eform') level(`level')
 
 	}
@@ -178,7 +179,7 @@ program mlincom, eclass
 			_estimates hold `hold'
 			capture noisily break {
 				ereturn post `beta' `vcov' , depname("`depname'") obs(`obs') dof(`dof') esample(`esample')
-				ereturn local cmd "mlincom"
+				ereturn local cmd "xlincom"
 				ereturn display, eform(`eform') level(`level')
 			}
 			local rc = _rc
@@ -190,7 +191,7 @@ program mlincom, eclass
 	}
 end
 
-program mlincom_parse_name_eq, sclass
+program xlincom_parse_name_eq, sclass
 	version 8
 	args eq n
 	gettoken tok : eq, parse("(")
@@ -211,7 +212,7 @@ program mlincom_parse_name_eq, sclass
 	sreturn local eq = `"`eq'"'
 end	
 
-program mlincom_parse_eq_for_test, sclass
+program xlincom_parse_eq_for_test, sclass
 	version 8
 	gettoken tok rest : 0 , parse("()")
 	if `"`tok'"' != `"`0'"' {
@@ -234,7 +235,7 @@ program mlincom_parse_eq_for_test, sclass
 	sreturn local eq_for_test = `"`eq'"'
 end
 
-program mlincom_get_eq_vector, rclass
+program xlincom_get_eq_vector, rclass
 	version 8
 	args eq rownames n
 	
