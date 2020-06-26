@@ -111,7 +111,7 @@ results.
 
 {pstd} 
 If option {opt post} is not specified or {opt post} is specified together with option 
-{opt covzero}, {cmd:xlincom} does not have to calculate covariances, and {cmd:xlincom} will 
+{opt covzero}, {cmd:xlincom} does not have to calculate covariances and {cmd:xlincom} will 
 accept any syntax that is valid for {helpb lincom:lincom}. However, if covariances need to be
 calculated, {cmd:xlincom} needs to interpret the equations. {cmd:xlincom} has its own parser
 to do that, which is not as smart as Stata's inbuilt parser. It will only recognize parameters
