@@ -11,7 +11,7 @@ ssc install xlincom, replace
 
 To install from GitHub, type in Stata:
 ```Stata
-net install xlincom, from(https://raw.githubusercontent.com/WWakker/mlincom/master/) replace
+net install xlincom, from(https://raw.githubusercontent.com/WWakker/xlincom/master/) replace
 ```
 
 ## Requirements
