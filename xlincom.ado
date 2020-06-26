@@ -13,7 +13,7 @@ program xlincom, eclass
 		if "`e(cmd)'" != "xlincom" {
 			error 301
         	}
-        syntax [, EForm(string) 		   	           ///
+        	syntax [, EForm(string) 		   	   ///
 					   OR                      ///
 					   HR 			   ///
 					   SHR                     ///
