@@ -12,15 +12,15 @@ program xlincom, eclass
 	if replay() {
 		if "`e(cmd)'" != "xlincom" {
 			error 301
-        	}
-        	syntax [, EForm(string) 		   	   ///
-					   OR                      ///
-					   HR 			   ///
-					   SHR                     ///
-					   IRr 		           ///
-					   RRr                     ///
-					   Level(integer $S_level) ///
-					   ]
+		}
+		syntax [, EForm(string)            ///
+				   OR                      ///
+				   HR                      ///
+				   SHR                     ///
+				   IRr                     ///
+				   RRr                     ///
+				   Level(integer $S_level) ///
+				   ]
 		
 		// Only one display option allowed
 		local eformopt : word count `eform' `or' `hr' `shr' `irr' `rrr' 
@@ -28,19 +28,19 @@ program xlincom, eclass
 				di as error "only one display option can be specified"
 				exit 198
 		}
-    	}
+	}
 	else {
-		syntax anything [, EForm(string) 		           ///
+		syntax anything [, EForm(string)           ///
 						   OR                      ///
-						   HR 			   ///
-						   SHR           	   ///
-						   IRr 		     	   ///
+						   HR                      ///
+						   SHR                     ///
+						   IRr                     ///
 						   RRr                     ///
 						   Level(integer $S_level) ///
 						   DF(numlist max=1 >0)    ///
 						   POST                    ///
 						   COVZERO                 ///
-						   noHEADer		   ///
+						   noHEADer                ///
 						   ]
 		
 		// Only one display option allowed
