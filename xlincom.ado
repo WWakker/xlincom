@@ -1,4 +1,4 @@
-*! 1.0.3                26jun2020
+*! 1.0.4                30jun2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
 * 1.0.4     30jun2020   aesthetic changes
