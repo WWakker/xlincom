@@ -10,9 +10,8 @@ program xlincom, eclass
 	version 8
 
 	if replay() {
-		if "`e(cmd)'" != "xlincom" {
-			error 301
-		}
+		if "`e(cmd)'" != "xlincom" error 301
+		
 		syntax [, EForm(string)           ///
 		          OR                      ///
 		          HR                      ///
@@ -51,9 +50,7 @@ program xlincom, eclass
 		}
 		
 		// Header option
-		if "`header'" != "" {
-			local dont *
-		}
+		if "`header'" != "" local dont *
 		
 		// Parse anything, must be within parentheses, return list of "[(name)] equation"
 		local n_lc 0
@@ -116,9 +113,7 @@ program xlincom, eclass
 			if "`e(cmd)'" == "logistic" {
 				scalar `se' = `se' / `estimate'
 				scalar `estimate' = log(`estimate')
-				if `"`eform'"' == "" {
-					local eform "Odds Ratio"
-				}
+				if `"`eform'"' == "" local eform "Odds Ratio"
 			}
 			
 			scalar `variance' = `se' * `se'
@@ -139,9 +134,7 @@ program xlincom, eclass
 		if "`post'" != "" & "`covzero'" == "" {
 			forval i = 1 / `n_lc' {
 				forval j = 1 / `n_lc' {
-					if `i' != `j' {
-						mat `vcov'[`i',`j'] = `c`i''' * `eV' * `c`j''
-					}
+					if `i' != `j' mat `vcov'[`i',`j'] = `c`i''' * `eV' * `c`j''
 				}
 			}	
 		}
@@ -170,7 +163,6 @@ program xlincom, eclass
 		ereturn local cmd "xlincom"
 		ereturn local predict "xlincom_p"
 		ereturn display, eform(`eform') level(`level')
-
 	}
 	else if replay() ereturn display, eform(`eform') level(`level')
 	else {
@@ -184,9 +176,7 @@ program xlincom, eclass
 			}
 			local rc = _rc
 			_estimates unhold `hold'
-			if `rc' {
-					exit `rc'
-			}
+			if `rc' exit `rc'
 		}
 	}
 end
@@ -267,7 +257,7 @@ program xlincom_get_eq_vector, rclass
 				di as error "{bf:``i''} not found in matrix e(V)"
 				exit 303
 			}
-			else { // IF VAR e(V)
+			else { // If parameter in e(V)
 				if inlist("``=`i'-1''", "+", "-", "") { 
 					if inlist("``=`i'+1''", "+", "-", "") {
 						if "``=`i'-1''" == "-" {
