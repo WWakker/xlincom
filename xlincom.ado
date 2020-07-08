@@ -213,9 +213,7 @@ program xlincom_parse_name_eq, sclass
 			local eq_name `first'
 			gettoken equalsign eq : eq, parse("=")
 		}
-		else {
-			local eq_name lc_`n'
-		}
+		else local eq_name lc_`n'
 	}
 	else {
 		local eq_name lc_`n'
