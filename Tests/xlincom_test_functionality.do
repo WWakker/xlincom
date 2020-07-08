@@ -1,5 +1,8 @@
+*********************************
+** XLINCOM FUNCTIONALITY TESTS **
+*********************************
+
 discard
-** TESTS **
 clear all
 
 // Syntax
