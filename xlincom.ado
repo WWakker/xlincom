@@ -1,6 +1,7 @@
-*! 1.0.4                30jun2020
+*! 1.0.5                08jul2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.0.5     08jul2020   name specification syntax change (name) --> name=
 * 1.0.4     30jun2020   aesthetic changes
 * 1.0.3     26jun2020   name change mlincom --> xlincom
 * 1.0.2     09jun2020   proper error code when parentheses found in equation
@@ -53,22 +54,11 @@ program xlincom, eclass
 		// Header option
 		if "`header'" != "" local dont *
 		
-		// Parse anything, must be within parentheses, return list of "[(name)] equation"
-		local n_lc 0
-		gettoken tok : anything, parse(" (")
-		if `"`tok'"' == "(" { 
-			while `"`tok'"' != "" {
-				local ++n_lc
-				gettoken tok anything : anything, parse(" (") match(paren)
-				local tokens `"`tokens' `"`tok'"'"'
-				gettoken tok : anything, parse(" (")
-				if !inlist(`"`tok'"', "(", "") {
-					di as error "equation must be contained within parentheses"
-					exit 198
-				}
-			}
-		}
-		else di as error "equation must be contained within parentheses"
+		// Parse input, must be within parentheses,
+		// return list of "[name=] equation" and number of equations
+		xlincom_check_parentheses `anything'
+		local name_eq_list "`s(name_eq_list)'"
+		local n_lc = s(n_lc)
 			
 		// Store e(V) matrix
 		tempname eV
@@ -77,7 +67,7 @@ program xlincom, eclass
 		local n_eV = rowsof(`eV')
 		
 		// Extract estimation output (code based on Roger Newson's lincomest.ado)
-		local depname `"`e(depvar)'"'
+		local depname = e(depvar)
 		tempvar esample
 		local obs = e(N)
 		if "`df'" == "" local dof = e(df_r)
@@ -93,11 +83,11 @@ program xlincom, eclass
 		
 		// Start execution
 		local i 1
-		foreach name_eq in `tokens' {
+		foreach name_eq of local name_eq_list {
 			xlincom_parse_name_eq `"`name_eq'"' `i'
-			local eq_names `eq_names' `s(eq_name)'
-			local name `s(eq_name)'
-			local eq `s(eq)'
+			local eq_names "`eq_names' `s(eq_name)'"
+			local name "`s(eq_name)'"
+			local eq "`s(eq)'"
 			
 			if "`post'" != "" & "`covzero'" == "" {
 				xlincom_parse_eq_for_test `eq'
@@ -125,7 +115,7 @@ program xlincom, eclass
 			if "`post'" != "" & "`covzero'" == "" {
 				xlincom_get_eq_vector `"`eq'"' `"`rownames'"' `n_eV'
 				tempname c`i'
-				mat `c`i'' = r(A)
+				mat `c`i'' = r(eq_vector)
 			}
 			
 			local ++i
@@ -148,7 +138,7 @@ program xlincom, eclass
 	}
 	
 	// Eform options 
-	if "`eform'" == "" {
+	if `"`eform'"' == "" {
 		if "`or'" != "" local eform "Odds Ratio"
 		else if "`hr'" != "" local eform "Haz. Ratio"
 		else if "`shr'" != "" local eform "SHR"
@@ -182,36 +172,69 @@ program xlincom, eclass
 	}
 end
 
+program xlincom_check_parentheses, sclass
+	version 8
+	local n_lc 0
+	gettoken first : 0, parse(" (")
+	if `"`first'"' == "(" { 
+		while `"`first'"' != "" {
+			local ++n_lc
+			gettoken first 0 : 0, parse(" (") match(paren)
+			local first `first'
+			local name_eq_list `"`name_eq_list' `"`first'"'"'
+			gettoken first : 0, parse(" (")
+			if !inlist(`"`first'"', "(", "") {
+				di as error "equation must be contained within parentheses"
+				exit 198
+			}
+		}
+	}
+	else {
+		di as error "equation must be contained within parentheses"
+		exit 198
+	}
+	
+	sreturn local name_eq_list "`name_eq_list'"
+	sreturn local n_lc = `n_lc'
+end
+
 program xlincom_parse_name_eq, sclass
 	version 8
-	args eq n
-	gettoken tok : eq, parse("(")
-	if `"`tok'"' == "(" {
-		gettoken tok 0 : eq, parse("(") match(paren)
-		local wc : word count `tok'
-		if `wc' > 1 {
-			di as error "{bf:`tok'} invalid name"
-			exit 7
+	args name_eq n
+	gettoken first eq : name_eq, parse("=")
+	if "`first'" != "`name_eq'" {
+		if "`first'" != "=" {
+			local wc : word count `first'
+			if `wc' > 1 {
+				di as error "{bf:`first'} invalid name"
+				exit 7
+			}
+			confirm names `first'
+			local eq_name `first'
+			gettoken equalsign eq : eq, parse("=")
 		}
-		confirm names `tok'
-		local name `tok'
-		local eq `"`0'"'
+		else {
+			local eq_name lc_`n'
+		}
 	}
-	else local name "lc_`n'"
+	else {
+		local eq_name lc_`n'
+		local eq `name_eq'
+	}
 	
-	sreturn local eq_name = `"`name'"'
-	sreturn local eq = `"`eq'"'
+	sreturn local eq_name `eq_name'
+	sreturn local eq `eq'
 end	
 
 program xlincom_parse_eq_for_test, sclass
 	version 8
-	gettoken tok rest : 0 , parse("()")
-	if `"`tok'"' != `"`0'"' {
+	gettoken first rest : 0 , parse("()")
+	if `"`first'"' != `"`0'"' {
 		di as error "parentheses not allowed in equation"
 		exit 198
 	}
-	gettoken tok rest : 0 , parse(":")
-	if `"`tok'"' == `"`0'"' local eq `"`0'"'
+	gettoken first rest : 0 , parse(":")
+	if `"`first'"' == `"`0'"' local eq `"`0'"'
 	else {
 		tokenize `"`0'"', parse(" :+-/*()")
 		local i 1
@@ -223,7 +246,7 @@ program xlincom_parse_eq_for_test, sclass
 		}
 	}
 	
-	sreturn local eq_for_test = `"`eq'"'
+	sreturn local eq_for_test `eq'
 end
 
 program xlincom_get_eq_vector, rclass
@@ -306,5 +329,5 @@ program xlincom_get_eq_vector, rclass
 		local ++i
 	}
 	
-	return matrix A = `A'
+	return matrix eq_vector = `A'
 end

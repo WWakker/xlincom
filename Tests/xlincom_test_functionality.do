@@ -19,18 +19,31 @@ assert _rc == 198
 xlincom (mpg)
 
 * Test 3
-
-xlincom ((name) mpg)
-xlincom ( (name) mpg)
-xlincom (( name) mpg)
-xlincom ( ( name ) mpg)
-cap xlincom ((name) (mpg)
+xlincom (name=mpg)
+xlincom ( name= mpg)
+xlincom ( name= mpg)
+xlincom (  name = mpg)
+xlincom ( mpg)
+xlincom ( mpg) ( weight)
+xlincom (name = mpg) (name2 =  weight)
+xlincom (      name    =    mpg    ) (   name2    =   weight    )
+cap xlincom ((mpg - 2) / weight)
+assert _rc == 131
+xlincom ((mpg - 2) / 2)
+cap xlincom ((mpg - 2) / 2), post
 assert _rc == 198
-xlincom ((name) (mpg))
-cap xlincom ((mpg))
-assert _rc == 198
-cap xlincom ((mpg + 2))
+xlincom (name1=(mpg - 2) / 2)
+cap xlincom ((name1=mpg - 2) / 2)
 assert _rc == 7
+cap xlincom (name1 name2 = mpg)
+assert _rc == 7
+cap xlincom (1name1 = mpg)
+assert _rc == 7
+cap xlincom (name= (mpg)
+assert _rc == 198
+xlincom (name= (mpg))
+xlincom ((mpg))
+xlincom ((mpg + 2))
 cap xlincom (mpg) (mpg
 assert _rc == 198
 cap xlincom (mpg) mpg
@@ -40,7 +53,7 @@ assert _rc == 198
 
 * Test 4
 reg price mpg weight
-xlincom ((name) mpg) (weight * 2), post
+xlincom (name= mpg) (weight * 2), post
 xlincom
 xlincom, level(90)
 xlincom, level(90) eform(exp)
@@ -50,29 +63,33 @@ assert _rc == 198
 
 * Test 5
 qui reg price mpg weight
-cap xlincom ((name) mpg) (weight1 * 2), post
+cap xlincom (name= mpg) (weight1 * 2), post
 assert _rc == 111
 
 qui reg price mpg weight
-cap xlincom ((name) mpg) (_b[weight] * 2), post
+cap xlincom (name= mpg) (weight = weight1 * 2), post
+assert _rc == 111
+
+qui reg price mpg weight
+cap xlincom (name= mpg) (_b[weight] * 2), post
 assert _rc == 303
 
 qui reg price mpg weight
-cap xlincom ((name) mpg) ((name) mpg) (_b[weight] * 2), post
+cap xlincom (name= mpg) (name= mpg) (_b[weight] * 2), post
 assert _rc == 303
 
 qui reg price mpg weight
-xlincom ((name) mpg) ((name) mpg) (_b[weight] * 2), post covzero
+xlincom (name= mpg) (name= mpg) (_b[weight] * 2), post covzero
 
 qui reg price mpg weight
-xlincom ((name) mpg) ((name) mpg) (weight * 2), post 
+xlincom (name= mpg) (name= mpg) (weight * 2), post 
 
 qui reg price mpg weight
-cap xlincom (mpg * (2+3)) ((name) mpg) (weight * 2), post 
+cap xlincom (mpg * (2+3)) (name= mpg) (weight * 2), post 
 assert _rc == 198
 
 qui reg price mpg weight
-cap xlincom ((name) mpg * (2+3)) ((name) mpg) (weight * 2), post 
+cap xlincom (name= mpg * (2+3)) (name= mpg) (weight * 2), post 
 assert _rc == 198
 
 ** Syntax options
@@ -223,7 +240,7 @@ sureg (price foreign weight length) (mpg foreign weight) (displ foreign weight)
 nlcom (-_b[price:foreign] / 2 + 2) (-_b[price:foreign] / -2 + 2) (-_b[mpg:_cons] + _b[displacement:weight] / 1.5), post
 mat NL = e(V)
 qui sureg (price foreign weight length) (mpg foreign weight) (displ foreign weight)
-xlincom (-price:foreign / 2 + 2) ((name)-price:foreign / -2 + 2) (-mpg:_cons + displacement:weight / 1.5), post
+xlincom (-price:foreign / 2 + 2) (name=-price:foreign / -2 + 2) (-mpg:_cons + displacement:weight / 1.5), post
 mat L = e(V)
 di mreldif(NL, L)
 assert mreldif(NL, L) <1e-10

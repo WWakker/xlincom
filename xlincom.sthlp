@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.3  26jun2020}{...}
+{* *! version 1.0.5  08jul2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
@@ -25,7 +25,7 @@
 {title:Syntax}
 
 {p 8 16 2}
-{cmd:xlincom} {cmd:(}[({it:name})] {it:{help exp}}{cmd:)} [{cmd:(}[({it:name})] {it:{help exp}}{cmd:)} ...] [{cmd:,} {it:options}]
+{cmd:xlincom} {cmd:(}[{it:name}=] {it:{help exp}}{cmd:)} [{cmd:(}[{it:name=}] {it:{help exp}}{cmd:)} ...] [{cmd:,} {it:options}]
 
 {synoptset 16}{...}
 {synopthdr}
@@ -49,8 +49,8 @@
 {it:exp} is any linear combination of coefficients that is valid
 syntax for {helpb lincom:lincom}. The exception is when option {opt post}
 without {opt covzero} is specified, see {helpb xlincom##remarks:remarks}. All linear combinations must 
-be contained within parentheses. An optional {it:name} may be specified, within parentheses,
-to label the transformation; {it:name} can be any valid Stata name. 
+be contained within parentheses. An optional {it:name} may be specified to label the transformation; 
+{it:name} can be any valid Stata name. 
 
 
 {marker description}{...}
@@ -140,10 +140,10 @@ or {cmd:mpg / 1.5}.
 {phang2}{cmd:. xlincom (x2-x1) (3*x1 + 500*x3) (3*x1 + 500*x3 - 12)}{p_end}
 
 {pstd}Estimate linear combinations of coefficients with {cmd:xlincom}, label transformations{p_end}
-{phang2}{cmd:. xlincom ((name1) x2-x1) ((name2) 3*x1 + 500*x3) ((name3) 3*x1 + 500*x3 - 12)}{p_end}
+{phang2}{cmd:. xlincom (name1 = x2-x1) (name2 = 3*x1 + 500*x3) (name3 = 3*x1 + 500*x3 - 12)}{p_end}
 
 {pstd}Estimate linear combinations of coefficients with {cmd:xlincom}, label transformations and post results{p_end}
-{phang2}{cmd:. xlincom ((name1) x2-x1) ((name2) 3*x1 + 500*x3) ((name3) 3*x1 + 500*x3 - 12), post}{p_end}
+{phang2}{cmd:. xlincom (name1 = x2-x1) (name2 = 3*x1 + 500*x3) (name3 = 3*x1 + 500*x3 - 12), post}{p_end}
 
 
 {marker results}{...}
