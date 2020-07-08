@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.0.5  08jul2020}{...}
+{* *! version 1.1.0 08jul2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}

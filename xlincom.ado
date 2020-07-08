@@ -1,7 +1,7 @@
-*! 1.0.5                08jul2020
+*! 1.1.0                08jul2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
-* 1.0.5     08jul2020   name specification syntax change (name) --> name=
+* 1.1.0     08jul2020   name specification syntax change (name) --> name=
 * 1.0.4     30jun2020   aesthetic changes
 * 1.0.3     26jun2020   name change mlincom --> xlincom
 * 1.0.2     09jun2020   proper error code when parentheses found in equation
