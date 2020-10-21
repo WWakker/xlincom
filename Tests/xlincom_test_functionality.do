@@ -346,4 +346,7 @@ qui sureg (price foreign weight length) (mpg foreign weight)
 cap noisily xlincom (price:foreign * (2+2) + mpg:foreign / 3) (price:foreign), post
 assert _rc == 198
 
+qui sureg (price foreign weight length) (mpg foreign weight)
+xlincom ((price:foreign + price:weight) * 2), post covzero
+
 di "All tests passed"

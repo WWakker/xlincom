@@ -243,12 +243,12 @@ program xlincom_parse_eq_for_test, sclass
 	gettoken first rest : eq , parse(":")
 	if `"`first'"' == `"`eq'"' local eq_for_test `"`eq'"'
 	else {
-		tokenize `"`eq'"', parse(":+-/*")
+		tokenize `"`eq'"', parse(":+-/*()")
 		local i 1
 		local 0
 		while "``i''" != "" {
 			local `i' = strtrim("``i''")
-			if inlist("``i''", "*", "/", "+", "-") local eq_for_test `"`eq_for_test' ``i''"'
+			if inlist("``i''", "*", "/", "+", "-", "(", ")") local eq_for_test `"`eq_for_test' ``i''"'
 			else if "``=`i'+1''" == ":" & !strpos("``i''", "[") local eq_for_test `"`eq_for_test' [``i'']"'
 			else if "``=`i'-1''" == ":" local eq_for_test `"`eq_for_test'``i''"'
 			else if "``i''" != ":" & !strpos("``=`i'-1''", "[") local eq_for_test `"`eq_for_test' ``i''"'
