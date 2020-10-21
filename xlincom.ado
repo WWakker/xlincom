@@ -173,6 +173,7 @@ end
 // Check if parentheses are properly specified
 program xlincom_check_parentheses, sclass
 	version 8
+	
 	local n_lc 0
 	gettoken first : 0, parse(" (")
 	if `"`first'"' == "(" { 
@@ -202,6 +203,7 @@ end
 program xlincom_parse_name_eq, sclass
 	version 8
 	args name_eq n
+	
 	gettoken first eq : name_eq, parse("=")
 	if "`first'" != "`name_eq'" {
 		if "`first'" != "=" {
@@ -265,14 +267,11 @@ program xlincom_get_eq_vector, rclass
 	version 8
 	args eq rownames n
 	
-	local 0
-	
-	tokenize `eq', parse("+-*/")
-	
 	tempname A
 	mat `A' = J(`n',1,0)
 	mat rownames `A' = `rownames'
-	
+	tokenize `eq', parse("+-*/")
+	local 0
 	local i 1
 	while "``i''" != "" {
 		local `i' = strtrim("``i''")
