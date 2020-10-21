@@ -1,6 +1,7 @@
-*! 1.1.0                08jul2020
+*! 1.1.1                08jul2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.1.1     21oct2020   allow eqno:coef syntax
 * 1.1.0     08jul2020   name specification syntax change (name) --> name=
 * 1.0.4     30jun2020   aesthetic changes
 * 1.0.3     26jun2020   name change mlincom --> xlincom
@@ -89,11 +90,8 @@ program xlincom, eclass
 			local name "`s(eq_name)'"
 			local eq "`s(eq)'"
 			
-			if "`post'" != "" & "`covzero'" == "" {
-				xlincom_parse_eq_for_test `eq'
-				qui lincom `s(eq_for_test)', level(`level') df(`df')
-			}
-			else qui lincom `s(eq)', level(`level') df(`df')
+			xlincom_parse_eq_for_test "`eq'" "`post'" "`covzero'"
+			qui lincom `s(eq_for_test)', level(`level') df(`df')
 			
 			`dont' di as txt %13s abbrev("`name':",13)  _column(16) as res "`eq' = 0"
 
@@ -112,7 +110,7 @@ program xlincom, eclass
 			mat `vcov'[`i', `i'] = `variance'
 			
 			// Get column vectors for covariance calculations
-			if "`post'" != "" & "`covzero'" == "" {
+			if "`post'" != "" & "`covzero'" == "" & `n_lc' > 1 {
 				xlincom_get_eq_vector `"`eq'"' `"`rownames'"' `n_eV'
 				tempname c`i'
 				mat `c`i'' = r(eq_vector)
@@ -122,7 +120,7 @@ program xlincom, eclass
 		}
 		
 		// Fill VCOV matrix with covariances
-		if "`post'" != "" & "`covzero'" == "" {
+		if "`post'" != "" & "`covzero'" == "" & `n_lc' > 1 {
 			forval i = 1 / `n_lc' {
 				forval j = 1 / `n_lc' {
 					if `i' != `j' mat `vcov'[`i',`j'] = `c`i''' * `eV' * `c`j''
@@ -172,6 +170,7 @@ program xlincom, eclass
 	}
 end
 
+// Check if parentheses are properly specified
 program xlincom_check_parentheses, sclass
 	version 8
 	local n_lc 0
@@ -198,6 +197,8 @@ program xlincom_check_parentheses, sclass
 	sreturn local n_lc = `n_lc'
 end
 
+// Parse name/eq expressions
+// Return name and equation
 program xlincom_parse_name_eq, sclass
 	version 8
 	args name_eq n
@@ -224,36 +225,49 @@ program xlincom_parse_name_eq, sclass
 	sreturn local eq `eq'
 end	
 
+// Parse equations, look for multiple equation expressions
+// Return equation that is accepted by test
 program xlincom_parse_eq_for_test, sclass
 	version 8
-	gettoken first rest : 0 , parse("()")
-	if `"`first'"' != `"`0'"' {
-		di as error "parentheses not allowed in equation"
-		exit 198
+	args eq post covzero
+	
+	if "`post'" != "" & "`covzero'" == "" {
+		gettoken first rest : eq , parse("()")
+		if `"`first'"' != `"`eq'"' {
+			di as error "parentheses not allowed in equation"
+			exit 198
+		}
 	}
-	gettoken first rest : 0 , parse(":")
-	if `"`first'"' == `"`0'"' local eq `"`0'"'
+	gettoken first rest : eq , parse(":")
+	if `"`first'"' == `"`eq'"' local eq_for_test `"`eq'"'
 	else {
-		tokenize `"`0'"', parse(" :+-/*()")
+		tokenize `"`eq'"', parse(":+-/*")
 		local i 1
+		local 0
 		while "``i''" != "" {
-			if "``=`i'+1''" == ":" local eq `"`eq' [``i'']"'
-			else if "``=`i'-1''" == ":" local eq `"`eq'``i''"'
-			else if !inlist("``i''", ":" , "(", ")") local eq `"`eq' ``i''"'
+			local `i' = strtrim("``i''")
+			if inlist("``i''", "*", "/", "+", "-") local eq_for_test `"`eq_for_test' ``i''"'
+			else if "``=`i'+1''" == ":" & !strpos("``i''", "[") local eq_for_test `"`eq_for_test' [``i'']"'
+			else if "``=`i'-1''" == ":" local eq_for_test `"`eq_for_test'``i''"'
+			else if "``i''" != ":" & !strpos("``=`i'-1''", "[") local eq_for_test `"`eq_for_test' ``i''"'
+			else if !strpos("``=`i'-1''", "]") & strpos("``=`i'-1''", "[") local eq_for_test `"`eq_for_test':"'
 			local ++i
 		}
 	}
 	
-	sreturn local eq_for_test `eq'
+	sreturn local eq_for_test `eq_for_test'
 end
 
+
+// Parse equation when post option is specified
+// Return matrix for covariance calculations
 program xlincom_get_eq_vector, rclass
 	version 8
 	args eq rownames n
 	
 	local 0
 	
-	tokenize `eq', parse("+-*/ ")
+	tokenize `eq', parse("+-*/")
 	
 	tempname A
 	mat `A' = J(`n',1,0)
@@ -261,6 +275,7 @@ program xlincom_get_eq_vector, rclass
 	
 	local i 1
 	while "``i''" != "" {
+		local `i' = strtrim("``i''")
 		cap confirm number ``i''
 		if _rc {
 			if inlist("``i''", "+", "-") {
@@ -318,8 +333,8 @@ program xlincom_get_eq_vector, rclass
 						}
 					}
 				}
-				else if inlist("``=`i'-1''", "*") {
-					if inlist("``=`i'-3''", "-") mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - ``=`i'-2''
+				else if "``=`i'-1''" == "*" {
+					if "``=`i'-3''" == "-" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - ``=`i'-2''
 					else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + ``=`i'-2''
 				}
 			}				
