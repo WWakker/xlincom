@@ -1,6 +1,7 @@
-*! 1.1.1                08jul2020
+*! 1.1.2                08jul2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.1.2     25oct2020   up to two digits in level option allowed
 * 1.1.1     21oct2020   allow eqno:coef syntax
 * 1.1.0     08jul2020   name specification syntax change (name) --> name=
 * 1.0.4     30jun2020   aesthetic changes
@@ -21,7 +22,7 @@ program xlincom, eclass
 		          SHR                     ///
 		          IRr                     ///
 		          RRr                     ///
-		          Level(integer $S_level) ///
+		          Level(cilevel)          ///
 		          ]
 		
 		// Only one display option allowed
@@ -38,7 +39,7 @@ program xlincom, eclass
 		                   SHR                     ///
 		                   IRr                     ///
 		                   RRr                     ///
-		                   Level(integer $S_level) ///
+		                   Level(cilevel)          ///
 		                   DF(numlist max=1 >0)    ///
 		                   POST                    ///
 		                   COVZERO                 ///
