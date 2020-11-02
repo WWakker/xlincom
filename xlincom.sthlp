@@ -74,7 +74,7 @@ syntax for {helpb lincom:lincom}. The exception is when posting results with mul
 combinations without specifying option {opt covzero}, see {helpb xlincom##remarks:remarks}. 
 In this case coefficients must be specified as they are found in matrix {cmd:e(V)} and the 
 expression cannot contain parentheses. An optional {it:name} may be specified to label 
-the transformation; {it:name} can be any {mansection U 11.3Namingconventions:valid Stata name}. 
+the transformation; {it:name} can be any {help reswords:valid Stata name}. 
 
 
 {marker description}{...}
