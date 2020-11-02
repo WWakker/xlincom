@@ -280,13 +280,13 @@ program xlincom_get_eq_vector, rclass
 		if _rc {
 			if inlist("``i''", "+", "-") {
 				if inlist("``=`i'+1''", "-", "+") { 
-					di as error "++, --, +-, -+ not allowed"
+					di as error "--, +-, -+ not allowed"
 					exit 198
 				}
 			}
 			else if inlist("``i''", "*", "/") {
 				 if inlist("``=`i'+2''", "*", "/") | inlist("``=`i'+3''", "*", "/") { 
-					di as error "maximum number of multiplications/divisions per estimate = 1"
+					di as error "maximum number of multiplications/divisions per parameter: {bf:1}"
 					exit 198
 				}
 			}
