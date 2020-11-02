@@ -1,6 +1,7 @@
-*! 1.1.2                02nov2020
+*! 1.2.1                02nov2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.2.1     02nov2020   display options allowed
 * 1.2.0     02nov2020   no parentheses necessary and no constrained syntax for single equation
 * 1.1.2     26oct2020   up to two decimals in level option allowed
 * 1.1.1     21oct2020   allow eqno:coef syntax
@@ -24,6 +25,7 @@ program xlincom, eclass
 		          IRr                     ///
 		          RRr                     ///
 		          Level(cilevel)          ///
+				  *                       ///
 		          ]
 		
 		// Only one display option allowed
@@ -32,6 +34,10 @@ program xlincom, eclass
 				di as error "only one display option can be specified"
 				exit 198
 		}
+		
+		// Get additional display options
+		 _get_diopts displayopts, `options'
+
 	}
 	else {
 		syntax anything(equalok) [, EForm(string)           ///
@@ -45,7 +51,8 @@ program xlincom, eclass
 		                            POST                    ///
 		                            COVZERO                 ///
 		                            noHEADer                ///
-		                            ]
+		                            *                       ///
+									]
 		
 		// Only one display option allowed
 		local eformopt : word count `eform' `or' `hr' `shr' `irr' `rrr' 
@@ -53,6 +60,9 @@ program xlincom, eclass
 				di as error "only one display option can be specified"
 				exit 198
 		}
+		
+		// Get additional display options
+		 _get_diopts displayopts, `options'
 		
 		// Header option
 		if "`header'" != "" local dont *
@@ -153,9 +163,9 @@ program xlincom, eclass
 		ereturn post `beta' `vcov' , depname("`depname'") obs(`obs') dof(`dof') esample(`esample')
 		ereturn local cmd "xlincom"
 		ereturn local predict "xlincom_p"
-		ereturn display, eform(`eform') level(`level')
+		ereturn display, eform(`eform') level(`level') `displayopts'
 	}
-	else if replay() ereturn display, eform(`eform') level(`level')
+	else if replay() ereturn display, eform(`eform') level(`level') `displayopts'
 	else {
 		tempname hold
 		nobreak {
@@ -163,7 +173,7 @@ program xlincom, eclass
 			capture noisily break {
 				ereturn post `beta' `vcov' , depname("`depname'") obs(`obs') dof(`dof') esample(`esample')
 				ereturn local cmd "xlincom"
-				ereturn display, eform(`eform') level(`level')
+				ereturn display, eform(`eform') level(`level') `displayopts'
 			}
 			local rc = _rc
 			_estimates unhold `hold'
@@ -281,13 +291,13 @@ program xlincom_get_eq_vector, rclass
 		if _rc {
 			if inlist("``i''", "+", "-") {
 				if inlist("``=`i'+1''", "-", "+") { 
-					di as error "--, +-, -+ not allowed"
+					di as error "++, --, +-, -+ not allowed"
 					exit 198
 				}
 			}
 			else if inlist("``i''", "*", "/") {
 				 if inlist("``=`i'+2''", "*", "/") | inlist("``=`i'+3''", "*", "/") { 
-					di as error "maximum number of multiplications/divisions per parameter: {bf:1}"
+					di as error "maximum number of multiplications/divisions per estimate = 1"
 					exit 198
 				}
 			}

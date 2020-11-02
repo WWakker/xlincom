@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.1 21oct2020}{...}
+{* *! version 1.2.1 02nov2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
@@ -45,13 +45,13 @@ Multiple combinations
 {synopt :{opt df(#)}}use t distribution with {it:#} degrees of freedom for
        computing p-values and confidence intervals{p_end}
 {synopt :{opt nohead:er}}suppress header output{p_end}
-
 {synopt :{opt ef:orm(string)}}user-specified label{p_end}
 {synopt :{opt or}}odds ratio{p_end}
 {synopt :{opt hr}}hazard ratio{p_end}
 {synopt :{opt shr}}subhazard ratio{p_end}
 {synopt :{opt ir:r}}incidence-rate ratio{p_end}
 {synopt :{opt rr:r}}relative-risk ratio{p_end}
+{synopt :{it:{help estimation_options##display_options:display_options}}}control column formats{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -71,10 +71,10 @@ Multiple combinations
 {pstd}
 {it:exp} is any linear combination of coefficients that is valid
 syntax for {helpb lincom:lincom}. The exception is when posting results with multiple 
-combinations, see {helpb xlincom##remarks:remarks}. In this case coefficients 
-must be specified as they are found in matrix {cmd:e(V)} and the expression cannot contain 
-parentheses. All linear combinations must be contained within parentheses. An optional 
-{it:name} may be specified to label the transformation; {it:name} can be any valid Stata name. 
+combinations without specifying option {opt covzero}, see {helpb xlincom##remarks:remarks}. 
+In this case coefficients must be specified as they are found in matrix {cmd:e(V)} and the 
+expression cannot contain parentheses. An optional {it:name} may be specified to label 
+the transformation; {it:name} can be any {mansection U 11.3Namingconventions:valid Stata name}. 
 
 
 {marker description}{...}
@@ -84,9 +84,9 @@ parentheses. All linear combinations must be contained within parentheses. An op
 {cmd:xlincom} computes point estimates, standard errors, t or z statistics,
 p-values, and confidence intervals for single or multiple linear combinations of coefficients 
 as well as covariances in the case of multiple combinations. {helpb nlcom:nlcom} can also do this, 
-but {cmd:xlincom} is much faster (up to 300 times for complex models) and offers the same syntax as lincom
-in most cases. {cmd:xlincom} internally calls {helpb lincom:lincom} for each linear combination and 
-extracts estimates and variances from its output.
+but {cmd:xlincom} is much faster (up to 300 times for complex models) and offers the same syntax as 
+{helpb lincom:lincom} in most cases. {cmd:xlincom} internally calls {helpb lincom:lincom} for each 
+linear combination and extracts estimates and variances from its output.
 
 {pstd}
 If option {opt post} is specified, estimation results will be posted in {cmd:e()} for exporting with pretty tables
@@ -144,7 +144,7 @@ recognize parameters as they are found in {cmd:e(V)} (type {cmd:matrix list e(V)
 command to see how parameters are named). Furthermore, it will only accept one multiplication or 
 division per parameter. For example, {cmd:2/3 * mpg} would be invalid. Instead, type {cmd:0.667 * mpg} 
 or {cmd:mpg / 1.5}. Finally, parentheses and multiple subsequent addition/subtraction operators (--, +-, -+)
-are not allowerd. It is possible to make use of the unconstrained syntax while still posting results 
+are not allowed. It is possible to make use of the unconstrained syntax while still posting results 
 by specifying the {opt covzero} option. In this case the transformations should not be tested against
 each other as this will yield invalid results.
 
@@ -159,18 +159,17 @@ each other as this will yield invalid results.
 {phang2}{cmd:. webuse regress}{p_end}
 {phang2}{cmd:. regress y x1 x2 x3}{p_end}
 
-{pstd}Estimate linear combinations of coefficients with {cmd:lincom}{p_end}
-{phang2}{cmd:. lincom x2-x1}{p_end}
-{phang2}{cmd:. lincom 3*x1 + 500*x3}{p_end}
-{phang2}{cmd:. lincom 3*x1 + 500*x3 - 12}{p_end}
+{pstd}Estimate single linear combination{p_end}
+{phang2}{cmd:. xlincom x2-x1}{p_end}
 
-{pstd}Estimate linear combinations of coefficients with {cmd:xlincom}{p_end}
-{phang2}{cmd:. xlincom (x2-x1) (3*x1 + 500*x3) (3*x1 + 500*x3 - 12)}{p_end}
+{pstd}Estimate single linear combination, label transformation{p_end}
+{phang2}{cmd:. xlincom myname = 3*x1 + 500*x3}{p_end}
 
-{pstd}Estimate linear combinations of coefficients with {cmd:xlincom}, label transformations{p_end}
-{phang2}{cmd:. xlincom (name1 = x2-x1) (name2 = 3*x1 + 500*x3) (name3 = 3*x1 + 500*x3 - 12)}{p_end}
+{pstd}Estimate single linear combination, label transformation and post results{p_end}
+{phang2}{cmd:. xlincom myname =  3*x1 + 500*x3 - 12, post}{p_end}
 
-{pstd}Estimate linear combinations of coefficients with {cmd:xlincom}, label transformations and post results{p_end}
+{pstd}Estimate multiple linear combinations of coefficients, label transformations and post results{p_end}
+{phang2}{cmd:. qui regress y x1 x2 x3}{p_end}
 {phang2}{cmd:. xlincom (name1 = x2-x1) (name2 = 3*x1 + 500*x3) (name3 = 3*x1 + 500*x3 - 12), post}{p_end}
 
 
