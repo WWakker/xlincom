@@ -16,28 +16,44 @@ assert _rc == 301
 sysuse auto
 reg price mpg weight
 
-cap noisily  xlincom mpg
-assert _rc == 198 
-
+xlincom mpg
 xlincom (mpg)
+cap noisily xlincom mpg mpg
+assert _rc == 111
 
 * Test 3
+xlincom name=mpg
 xlincom (name=mpg)
+xlincom  name= mpg
 xlincom ( name= mpg)
+xlincom  name= mpg
 xlincom ( name= mpg)
+xlincom   name = mpg
 xlincom (  name = mpg)
 xlincom ( mpg)
 xlincom ( mpg) ( weight)
+cap noisily xlincom name = mpg (name2 =  weight)
+assert _rc == 133
+cap noisily xlincom name = mpg) (name2 =  weight)
+assert _rc == 198
+cap noisily xlincom (name = mpg) name2 =  weight
+assert _rc == 198
+cap noisily xlincom name = mpg name2 =  weight)
+assert _rc == 198
+cap noisily xlincom name = mpg (name2 =  weight
+assert _rc == 198
+cap noisily xlincom name = mpg name2 =  weight
+assert _rc == 198
 xlincom (name = mpg) (name2 =  weight)
 xlincom (      name    =    mpg    ) (   name2    =   weight    )
 cap noisily xlincom ((mpg - 2) / weight)
 assert _rc == 131
 xlincom ((mpg - 2) / 2)
-cap noisily xlincom ((mpg - 2) / 2), post
-assert _rc == 198
 xlincom (name1=(mpg - 2) / 2)
 cap noisily xlincom ((name1=mpg - 2) / 2)
 assert _rc == 7
+cap noisily xlincom name = mpg = weight
+assert _rc == 198
 cap noisily xlincom (name1 name2 = mpg)
 assert _rc == 7
 cap noisily xlincom (1name1 = mpg)
@@ -53,6 +69,34 @@ cap noisily xlincom (mpg) mpg
 assert _rc == 198
 cap noisily xlincom (mpg) mpg)
 assert _rc == 198
+
+qui reg price mpg weight
+xlincom name = mpg + (weight), post
+
+qui reg price mpg weight
+xlincom (name = mpg + (weight)), post
+
+qui reg price mpg weight
+cap noisily xlincom (name = mpg + (weight)) (mpg), post
+assert _rc == 198
+
+qui reg price mpg weight
+cap noisily xlincom (name = mpg + (weight)) mpg, post
+assert _rc == 198
+
+qui reg price mpg weight
+xlincom (name = mpg + (weight)) (mpg), post covzero
+mat A = e(V)
+qui reg price mpg weight
+xlincom (name = mpg + weight) (mpg), post
+mat B = e(V)
+di mreldif(A, B)
+
+qui reg price mpg weight
+nlcom (_b[mpg] + _b[weight]) (_b[mpg]), post
+mat C = e(V)
+di mreldif(B, C)
+assert mreldif(B, C) < 1e-10
 
 * Test 4
 reg price mpg weight
@@ -300,10 +344,14 @@ xlincom ([#1]_b[foreign] * (2 + 2) + [#2]_b[foreign] / 3)
 xlincom (price:foreign * (2 + 2) + mpg:foreign / 3)
 xlincom (price: foreign * (2 + 2) + mpg :foreign / 3)
 
-cap noisily xlincom ([price]foreign * (2 + 2) + [mpg]foreign / 3), post
-assert _rc == 198
+xlincom ([price]foreign * (2 + 2) + [mpg]foreign / 3), post
 
 qui sureg (price foreign weight length) (mpg foreign weight)
+cap noisily xlincom ([price]foreign * (2 + 2) + [mpg]foreign / 3) ([mpg]foreign), post
+assert _rc == 198
+cap noisily xlincom ([price]foreign * 4 + [mpg]foreign / 3) ([mpg]foreign), post
+assert _rc == 303
+
 xlincom (price:foreign * 4 + mpg:foreign / 3), post
 
 qui sureg (price foreign weight length) (mpg foreign weight)

@@ -1,6 +1,7 @@
-*! 1.1.2                26oct2020
+*! 1.1.2                02nov2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.2.0     02nov2020   no parentheses necessary and no constrained syntax for single equation
 * 1.1.2     26oct2020   up to two decimals in level option allowed
 * 1.1.1     21oct2020   allow eqno:coef syntax
 * 1.1.0     08jul2020   name specification syntax change (name) --> name=
@@ -33,18 +34,18 @@ program xlincom, eclass
 		}
 	}
 	else {
-		syntax anything [, EForm(string)           ///
-		                   OR                      ///
-		                   HR                      ///
-		                   SHR                     ///
-		                   IRr                     ///
-		                   RRr                     ///
-		                   Level(cilevel)          ///
-		                   DF(numlist max=1 >0)    ///
-		                   POST                    ///
-		                   COVZERO                 ///
-		                   noHEADer                ///
-		                   ]
+		syntax anything(equalok) [, EForm(string)           ///
+		                            OR                      ///
+		                            HR                      ///
+		                            SHR                     ///
+		                            IRr                     ///
+		                            RRr                     ///
+		                            Level(cilevel)          ///
+		                            DF(numlist max=1 >0)    ///
+		                            POST                    ///
+		                            COVZERO                 ///
+		                            noHEADer                ///
+		                            ]
 		
 		// Only one display option allowed
 		local eformopt : word count `eform' `or' `hr' `shr' `irr' `rrr' 
@@ -91,7 +92,7 @@ program xlincom, eclass
 			local name "`s(eq_name)'"
 			local eq "`s(eq)'"
 			
-			xlincom_parse_eq_for_test "`eq'" "`post'" "`covzero'"
+			xlincom_parse_eq_for_test "`eq'" "`post'" "`covzero'" "`n_lc'"
 			qui lincom `s(eq_for_test)', level(`level') df(`df')
 			
 			`dont' di as txt %13s abbrev("`name':",13)  _column(16) as res "`eq' = 0"
@@ -191,8 +192,8 @@ program xlincom_check_parentheses, sclass
 		}
 	}
 	else {
-		di as error "equation must be contained within parentheses"
-		exit 198
+		local name_eq_list `""`0'""'
+		local n_lc 1
 	}
 	
 	sreturn local name_eq_list "`name_eq_list'"
@@ -232,9 +233,9 @@ end
 // Return equation that is accepted by test
 program xlincom_parse_eq_for_test, sclass
 	version 8
-	args eq post covzero
+	args eq post covzero n_lc
 	
-	if "`post'" != "" & "`covzero'" == "" {
+	if "`post'" != "" & "`covzero'" == "" & `n_lc' > 1 {
 		gettoken first rest : eq , parse("()")
 		if `"`first'"' != `"`eq'"' {
 			di as error "parentheses not allowed in equation"
