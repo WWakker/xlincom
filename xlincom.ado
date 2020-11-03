@@ -115,7 +115,7 @@ program xlincom, eclass
 			if "`e(cmd)'" == "logistic" {
 				scalar `se' = `se' / `estimate'
 				scalar `estimate' = log(`estimate')
-				if "`eform'" == "" local or "or"
+				if `eformopt' == 0 local or "or"
 			}
 			
 			scalar `variance' = `se' * `se'
