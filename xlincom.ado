@@ -1,6 +1,7 @@
-*! 1.2.1                02nov2020
+*! 1.2.2                03nov2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.2.2     03nov2020   eform option similar to lincom
 * 1.2.1     02nov2020   display options allowed
 * 1.2.0     02nov2020   no parentheses necessary and no constrained syntax for single equation
 * 1.1.2     26oct2020   up to two decimals in level option allowed
