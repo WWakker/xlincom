@@ -111,11 +111,11 @@ program xlincom, eclass
 			scalar `estimate' = r(estimate)
 			scalar `se' = r(se)
 			
-			// Calculate transform se and var if previous command is logistic (from Roger Newson's lincomest.ado)
+			// Calculate transformed se and var if previous command is logistic (from Roger Newson's lincomest.ado)
 			if "`e(cmd)'" == "logistic" {
 				scalar `se' = `se' / `estimate'
 				scalar `estimate' = log(`estimate')
-				if "`eform'" == "" local eform "Odds Ratio"
+				if "`eform'" == "" local or "or"
 			}
 			
 			scalar `variance' = `se' * `se'
