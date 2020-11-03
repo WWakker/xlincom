@@ -18,7 +18,7 @@ program xlincom, eclass
 	if replay() {
 		if "`e(cmd)'" != "xlincom" error 301
 		
-		syntax [, EForm(string)           ///
+		syntax [, EForm                   ///
 		          OR                      ///
 		          HR                      ///
 		          SHR                     ///
@@ -40,7 +40,7 @@ program xlincom, eclass
 
 	}
 	else {
-		syntax anything(equalok) [, EForm(string)           ///
+		syntax anything(equalok) [, EForm                   ///
 		                            OR                      ///
 		                            HR                      ///
 		                            SHR                     ///
@@ -114,7 +114,7 @@ program xlincom, eclass
 			if "`e(cmd)'" == "logistic" {
 				scalar `se' = `se' / `estimate'
 				scalar `estimate' = log(`estimate')
-				if `"`eform'"' == "" local eform "Odds Ratio"
+				if "`eform'" == "" local eform "Odds Ratio"
 			}
 			
 			scalar `variance' = `se' * `se'
@@ -148,13 +148,14 @@ program xlincom, eclass
 	}
 	
 	// Eform options 
-	if `"`eform'"' == "" {
+	if "`eform'" == "" {
 		if "`or'" != "" local eform "Odds Ratio"
 		else if "`hr'" != "" local eform "Haz. Ratio"
 		else if "`shr'" != "" local eform "SHR"
 		else if "`irr'" != "" local eform "IRR"
 		else if "`rrr'" != "" local eform "RRR"
 	}
+	else local eform "exp(b)"
 	
 	di
 	
