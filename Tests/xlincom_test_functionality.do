@@ -103,7 +103,7 @@ reg price mpg weight
 xlincom (name= mpg) (weight * 2), post nopvalues
 xlincom
 xlincom, level(90)
-xlincom, level(90) eform(exp)
+xlincom, level(90) eform
 xlincom, level(90) or
 cap noisily xlincom, level(90) hello
 assert _rc == 198
@@ -145,7 +145,7 @@ assert _rc == 198
 ** Syntax options
 qui reg price mpg weight
 xlincom (mpg)
-xlincom (mpg), eform(or)
+xlincom (mpg), eform
 xlincom (mpg), or
 cap noisily xlincom (mpg), or hr
 assert _rc == 198
