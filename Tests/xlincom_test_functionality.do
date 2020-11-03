@@ -100,11 +100,14 @@ assert mreldif(B, C) < 1e-10
 
 * Test 4
 reg price mpg weight
-xlincom (name= mpg) (weight * 2), post
+xlincom (name= mpg) (weight * 2), post nopvalues
 xlincom
 xlincom, level(90)
 xlincom, level(90) eform(exp)
 xlincom, level(90) or
+cap noisily xlincom, level(90) hello
+assert _rc == 198
+xlincom, level(90) nopvalues
 cap noisily xlincom, level(90) or eform(exp)
 assert _rc == 198
 
