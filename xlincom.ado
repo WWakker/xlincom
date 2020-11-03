@@ -25,7 +25,7 @@ program xlincom, eclass
 		          IRr                     ///
 		          RRr                     ///
 		          Level(cilevel)          ///
-				  *                       ///
+		          *                       ///
 		          ]
 		
 		// Only one display option allowed
@@ -36,7 +36,7 @@ program xlincom, eclass
 		}
 		
 		// Get additional display options
-		 _get_diopts displayopts, `options'
+		_get_diopts displayopts, `options'
 
 	}
 	else {
@@ -52,7 +52,7 @@ program xlincom, eclass
 		                            COVZERO                 ///
 		                            noHEADer                ///
 		                            *                       ///
-									]
+		                            ]
 		
 		// Only one display option allowed
 		local eformopt : word count `eform' `or' `hr' `shr' `irr' `rrr' 
@@ -62,7 +62,7 @@ program xlincom, eclass
 		}
 		
 		// Get additional display options
-		 _get_diopts displayopts, `options'
+		_get_diopts displayopts, `options'
 		
 		// Header option
 		if "`header'" != "" local dont *
