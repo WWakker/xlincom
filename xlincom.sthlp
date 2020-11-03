@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2.1 02nov2020}{...}
+{* *! version 1.2.2 03nov2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
@@ -45,7 +45,7 @@ Multiple combinations
 {synopt :{opt df(#)}}use t distribution with {it:#} degrees of freedom for
        computing p-values and confidence intervals{p_end}
 {synopt :{opt nohead:er}}suppress header output{p_end}
-{synopt :{opt ef:orm(string)}}user-specified label{p_end}
+{synopt :{opt ef:orm}}exponentiated coefficients; exp(b){p_end}
 {synopt :{opt or}}odds ratio{p_end}
 {synopt :{opt hr}}hazard ratio{p_end}
 {synopt :{opt shr}}subhazard ratio{p_end}
@@ -125,7 +125,7 @@ distribution if {cmd:e(df_r)} is missing.
 {opt noheader} suppresses header output.
 
 {phang}
-{opt eform(string)}, {opt or}, {opt hr}, {opt shr},  {opt irr}, and {opt rrr} all report
+{opt eform}, {opt or}, {opt hr}, {opt shr},  {opt irr}, and {opt rrr} all report
 coefficient estimates as exp(b) rather than b. Only one of these options may be 
 specified. {opt or} is the default after {cmd:logistic}. See {helpb lincom:help lincom} 
 for more information about these options.
