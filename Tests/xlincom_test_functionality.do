@@ -400,4 +400,57 @@ assert _rc == 198
 qui sureg (price foreign weight length) (mpg foreign weight)
 xlincom ((price:foreign + price:weight) * 2), post covzero
 
+// Estadd unit tests
+sysuse auto, clear
+reg price mpg weight headroom
+xlincom mpg, estadd()
+cap noisily xlincom mpg, estadd(stars)
+assert _rc == 198
+cap noisily xlincom mpg, estadd(star, brackets parentheses)
+assert _rc == 198
+cap noisily xlincom mpg, estadd(star, fmt(wrongformat))
+assert _rc == 7
+cap noisily xlincom mpg, estadd(star, fmt(%4.3f) bfmt(%4.3f))
+assert _rc == 198
+xlincom mpg, estadd(nostar, se t brackets)
+assert strpos("`e(se_lc_1)'", "[") == 1
+assert strpos("`e(t_lc_1)'", "[") == 1
+xlincom mpg, estadd(nostar, se t parentheses)
+assert strpos("`e(se_lc_1)'", "(") == 1
+assert strpos("`e(t_lc_1)'", ")") > 1
+xlincom mpg, estadd(nostar, parentheses fmt(%4.3f))
+xlincom mpg, level(90) estadd(nostar, se t p ci parentheses bfmt(%5.4f) sefmt(%4.3f) tfmt(%4.2f) pfmt(%4.2f) cifmt(%4.1f))
+xlincom (mpg + weight) (mpg) (headroom), estadd(nostar, se t parentheses bfmt(%5.4f) sefmt(%4.3f) tfmt(%4.2f))
+xlincom mpg, estadd(nostar)
+confirm number `e(b_lc_1)'
+xlincom name=mpg, estadd(nostar)
+confirm number `e(b_name)'
+cap noisily xlincom name=mpg, estadd(, se)
+assert _rc == 100
+
+// starlevels suboption
+discard
+reg price mpg weight headroom
+xlincom name=weight, estadd(star, se t)
+xlincom weight, estadd(nostar, se t par)
+xlincom (weight) (mpg) (headroom), estadd(star, se t par starlevels(* 1 "" .1))
+cap noisily xlincom (weight) (mpg) (headroom), estadd(star, se t par starlevels(* 1 "" .1 ""))
+assert _rc == 198
+cap noisily xlincom (weight) (mpg) (headroom), estadd(star, se t par starlevels(* 1 2 .1))
+assert _rc == 198
+cap noisily xlincom (weight) (mpg) (headroom), estadd(star, se t par starlevels(*** 0.01 ** .1))
+assert _rc == 198
+cap noisily xlincom (weight) (mpg) (headroom), estadd(star, se t par starlevels(*** "string" ** .1))
+assert _rc == 7
+
+// 
+discard
+reg price mpg weight headroom
+xlincom (mpg=mpg) (weight=weight) (headroom=headroom), estadd(star, se t ci par starlevels(* .1 ** .05 *** .01) cifmt(%2.1f))
+esttab, starlevels(* .1 ** .05 *** .01) stats(b_mpg ci_mpg _ b_weight ci_weight _ b_headroom ci_headroom)
+
+reg price i.foreign mpg
+xlincom (price_dom = _cons) (price_for = _cons + 1.foreign), estadd(star, se par bfmt(%4.1f) sefmt(%4.2f) starlevels(* .1 ** .05 *** .01))
+esttab, stats(b_price_dom se_price_dom _ b_price_for se_price_for ,star(r2_a)) starlevels(* .1 ** .05 *** .01)
+
 di "All tests passed"

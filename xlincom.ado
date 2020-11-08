@@ -20,14 +20,14 @@ program xlincom, eclass
 	if replay() {
 		if "`e(cmd)'" != "xlincom" error 301
 		
-		syntax [, EForm                   ///
-		          OR                      ///
-		          HR                      ///
-		          SHR                     ///
-		          IRr                     ///
-		          RRr                     ///
-		          Level(cilevel)          ///
-		          *                       ///
+		syntax [, EForm          ///
+		          OR             ///
+		          HR             ///
+		          SHR            ///
+		          IRr            ///
+		          RRr            ///
+		          Level(cilevel) ///
+		          *              ///
 		          ]
 		
 		// Only one display option allowed
@@ -42,20 +42,20 @@ program xlincom, eclass
 
 	}
 	else {
-		syntax anything(equalok) [, EForm                   ///
-		                            OR                      ///
-		                            HR                      ///
-		                            SHR                     ///
-		                            IRr                     ///
-		                            RRr                     ///
-		                            Level(cilevel)          ///
-		                            DF(numlist max=1 >0)    ///
-		                            POST                    ///
-		                            COVZERO                 ///
-		                            noHEADer                ///
-		                            ESTADD(string asis)     ///
-		                            *                       ///
-		                            ]
+		syntax anything(equalok id="expression") [, EForm                ///
+		                                            OR                   ///
+		                                            HR                   ///
+		                                            SHR                  ///
+		                                            IRr                  ///
+		                                            RRr                  ///
+		                                            Level(cilevel)       ///
+		                                            DF(numlist max=1 >0) ///
+		                                            POST                 ///
+		                                            COVZERO              ///
+		                                            noHEADer             ///
+		                                            ESTADD(string asis)  ///
+		                                            *                    ///
+		                                            ]
 		
 		// Only one display option allowed
 		local eformopt : word count `eform' `or' `hr' `shr' `irr' `rrr' 
@@ -195,7 +195,7 @@ program xlincom, eclass
 			if `rc' exit `rc'
 			if `"`estadd'"' != "" {
 				xlincom_parse_estadd `estadd'
-				xlincom_estadd "`n_lc'" "`eq_names'" "`rtable'" "`s(star)'" "`s(bfmt)'" "`s(sefmt)'" "`s(tfmt)'" "`s(left)'" "`s(right)'" `"`s(starlevels)'"'
+				xlincom_estadd "`n_lc'" "`eq_names'" "`rtable'" "`s(star)'" "`s(se)'" "`s(t)'" "`s(p)'" "`s(ci)'" "`s(bfmt)'" "`s(sefmt)'" "`s(tfmt)'" "`s(pfmt)'" "`s(cifmt)'" "`s(left)'" "`s(right)'" `"`s(starlevels)'"'
 			}
 		}
 	}
@@ -229,7 +229,7 @@ program xlincom_check_parentheses, sclass
 	sreturn local n_lc = `n_lc'
 end
 
-// Parse name/eq expressions
+// Parse name/eq expression
 // Return name and equation
 program xlincom_parse_name_eq, sclass
 	version 8
@@ -258,7 +258,7 @@ program xlincom_parse_name_eq, sclass
 	sreturn local eq `eq'
 end	
 
-// Parse equations, look for multiple equation expressions
+// Parse equation, look for multiple equation expressions
 // Return equation that is accepted by test
 program xlincom_parse_eq_for_test, sclass
 	version 8
@@ -375,16 +375,23 @@ program xlincom_get_eq_vector, rclass
 	return matrix eq_vector = `A'
 end
 
+// Parser for estadd option to check of everything is specified properly
 program xlincom_parse_estadd, sclass
 	version 8
-	syntax anything [, fmt(string)             ///
-	                   bfmt(string)            /// 
-					   sefmt(string)           /// 
-					   tfmt(string)            /// 
-					   PARentheses             ///
-					   BRAckets                ///
-					   STARLevels(string asis) ///
-					   ]
+	syntax anything(id="star|nostar") [, SE                      ///
+	                                     T                       ///
+					                     P                       ///
+					                     CI                      ///
+	                                     FMT(string)             ///
+	                                     BFMT(string)            /// 
+					                     SEFMT(string)           /// 
+					                     TFMT(string)            ///
+					                     PFMT(string)            ///
+					                     CIFMT(string)           ///
+					                     PARentheses             ///
+					                     BRAckets                ///
+					                     STARLevels(string asis) ///
+					                     ]
 	
 	if !inlist("`anything'", "star", "nostar") {
 		di as error "{bf:star} or {bf:nostar} must be specified in option {bf:estadd}"
@@ -396,12 +403,12 @@ program xlincom_parse_estadd, sclass
 		exit 198
 	}
 	
-	if "`fmt'" != "" & ("`bfmt'" != "" | "`sefmt'" != "" | "`tfmt'" != "") {
+	if "`fmt'" != "" & ("`bfmt'" != "" | "`sefmt'" != "" | "`tfmt'" != "" | "`pfmt'" != "") {
 		di as error "format options wrongly specified"
 		exit 198
 	}
 	
-	foreach format in "`fmt'" "`bfmt'" "`sefmt'" "`tmft'" {
+	foreach format in "`fmt'" "`bfmt'" "`sefmt'" "`tfmt'" "`pfmt'" {
 		if "`format'" != "" confirm numeric format `format'
 	}
 	
@@ -422,18 +429,26 @@ program xlincom_parse_estadd, sclass
 		}
 	}
 	
-	if `"`starlevels'"' == "" local starlevels "* 0.1 ** 0.05 *** 0.01"
+	if `"`starlevels'"' == "" local starlevels "* 0.05 ** 0.01 *** 0.001"
 	xlincom_parse_starlevels `"`starlevels'"'
 	
 	sreturn local star `anything'
+	sreturn local se `se'
+	sreturn local t `t'
+	sreturn local p `p'
+	sreturn local ci `ci'
 	sreturn local bfmt `bfmt'
 	sreturn local sefmt `sefmt'
 	sreturn local tfmt `tfmt'
+	sreturn local pfmt `pfmt'
+	sreturn local cifmt `cifmt'
 	sreturn local left `left'
 	sreturn local right `right'
 	sreturn local starlevels "`s(starl_list)'"
 end
 
+// Parser for starlevels suboption of estadd option
+// Check if specified properly and return list of sign/pval combinations
 program xlincom_parse_starlevels, sclass
 	version 8
 	args starlevels
@@ -449,7 +464,7 @@ program xlincom_parse_starlevels, sclass
 			confirm number `:word `i' of `starlevels''
 			if `i' >= 4 {
 				if `:word `i' of `starlevels'' >= `:word `=`i'-2' of `starlevels'' {
-					di as error "pvalues of option {bf:starlevels} must be specified in descending order"
+					di as error "pvalues in option {bf:starlevels} must be specified in descending order"
 					exit 198
 				}
 			}
@@ -470,28 +485,60 @@ program xlincom_parse_starlevels, sclass
 	sreturn local starl_list "`starl_list'"
 end
 
+// Add local or scalars of results to e()
 program xlincom_estadd, eclass
 	version 8
-	args n_lc names rtable star bfmt sefmt tfmt left right starlevels
+	args n_lc names rtable star se t p ci bfmt sefmt tfmt pfmt cifmt left right starlevels
+	
+	// Default formatting
+	local defaultfmt %4.3f
+	if "`star'" == "star" & "`bfmt'" == "" local bfmt `defaultfmt'
+	if "`left'" != "" {
+		foreach format in sefmt tfmt pfmt cifmt {
+			if "``format''" == "" local `format' `defaultfmt'
+		}
+	}
 	
 	forval i = 1/`n_lc' {
-		if "`star'" == "nostar" {
-			if "`left'" == "" {
-				if "`bfmt'" == "" ereturn scalar b_`:word `i' of `names'' = `rtable'[1, `i']
-				else ereturn local b_`:word `i' of `names'' = `:di `bfmt' `rtable'[1, `i']'
-				if "`sefmt'" == "" ereturn scalar se_`:word `i' of `names'' = `rtable'[2, `i']
-				else ereturn local se_`:word `i' of `names'' = `:di `sefmt' `rtable'[2, `i']'
+		if "`left'" == "" {
+			if "`ci'" != "" {
+				if "`cifmt'" == "" ereturn local p_`:word `i' of `names'' = "`=`rtable'[5, `i']',`=`rtable'[6, `i']'"
+				else ereturn local ci_`:word `i' of `names'' = "`:di `cifmt' `rtable'[5, `i']',`:di `cifmt' `rtable'[6, `i']'"
+			}
+			if "`p'" != "" {
+				if "`pfmt'" == "" ereturn scalar p_`:word `i' of `names'' = `rtable'[4, `i']
+				else ereturn local p_`:word `i' of `names'' = `:di `pfmt' `rtable'[4, `i']'
+			}
+			if "`t'" != "" {
 				if "`tfmt'" == "" ereturn scalar t_`:word `i' of `names'' = `rtable'[3, `i']
 				else ereturn local t_`:word `i' of `names'' = `:di `tfmt' `rtable'[3, `i']'
 			}
-			else {
-				if "`bfmt'" == "" ereturn local b_`:word `i' of `names'' = "`=`rtable'[1, `i']'"
-				else ereturn local b_`:word `i' of `names'' = "`:di `bfmt' `rtable'[1, `i']'"
-				if "`sefmt'" == "" ereturn local se_`:word `i' of `names'' = "`left'" + "`=`rtable'[2, `i']'" + "`right'"
-				else ereturn local se_`:word `i' of `names'' = "`left'" + "`:di `sefmt' `rtable'[2, `i']'" + "`right'"
+			if "`se'" != "" {
+				if "`sefmt'" == "" ereturn scalar se_`:word `i' of `names'' = `rtable'[2, `i']
+				else ereturn local se_`:word `i' of `names'' = `:di `sefmt' `rtable'[2, `i']'
+			}
+		}
+		else {
+			if "`ci'" != "" {
+				if "`cifmt'" == "" ereturn local p_`:word `i' of `names'' = "`left'" + "`=`rtable'[5, `i']',`=`rtable'[6, `i']'" + "`right'"
+				else ereturn local ci_`:word `i' of `names'' = "`left'" + "`:di `cifmt' `rtable'[5, `i']',`:di `cifmt' `rtable'[6, `i']'" + "`right'"
+			}
+			if "`p'" != "" {
+				if "`pfmt'" == "" ereturn local p_`:word `i' of `names'' = "`left'" + "`=`rtable'[4, `i']'" + "`right'"
+				else ereturn local p_`:word `i' of `names'' = "`left'" + "`:di `pfmt' `rtable'[4, `i']'" + "`right'"
+			}
+			if "`t'" != "" {
 				if "`tfmt'" == "" ereturn local t_`:word `i' of `names'' = "`left'" + "`=`rtable'[3, `i']'" + "`right'"
 				else ereturn local t_`:word `i' of `names'' = "`left'" + "`:di `tfmt' `rtable'[3, `i']'" + "`right'"
 			}
+			if "`se'" != "" {
+				if "`sefmt'" == "" ereturn local se_`:word `i' of `names'' = "`left'" + "`=`rtable'[2, `i']'" + "`right'"
+				else ereturn local se_`:word `i' of `names'' = "`left'" + "`:di `sefmt' `rtable'[2, `i']'" + "`right'"
+			}
+		}
+		if "`star'" == "nostar" {
+			if "`bfmt'" == "" ereturn scalar b_`:word `i' of `names'' = `rtable'[1, `i']
+			else ereturn local b_`:word `i' of `names'' = `:di `bfmt' `rtable'[1, `i']'
 		}
 		else {
 			local addstar
@@ -499,22 +546,8 @@ program xlincom_estadd, eclass
 				local sign `:word 1 of `level''
 				if `rtable'[4, `i'] < `:word 2 of `level'' local addstar `sign'
 			}
-			if "`left'" == "" {
-				if "`bfmt'" == "" ereturn local b_`:word `i' of `names'' = "`=`rtable'[1, `i']'`addstar'"
-				else ereturn local b_`:word `i' of `names'' = "`:di `bfmt' `rtable'[1, `i']'`addstar'"
-				if "`sefmt'" == "" ereturn local se_`:word `i' of `names'' = `rtable'[2, `i']
-				else ereturn local se_`:word `i' of `names'' = `:di `sefmt' `rtable'[2, `i']'
-				if "`tfmt'" == "" ereturn local t_`:word `i' of `names'' = `rtable'[3, `i']
-				else ereturn local t_`:word `i' of `names'' = `:di `tfmt' `rtable'[3, `i']'
-			}
-			else {
-				if "`bfmt'" == "" ereturn local b_`:word `i' of `names'' = "`=`rtable'[1, `i']'`addstar'"
-				else ereturn local b_`:word `i' of `names'' = "`:di `bfmt' `rtable'[1, `i']'`addstar'"
-				if "`sefmt'" == "" ereturn local se_`:word `i' of `names'' = "`left'" + "`=`rtable'[2, `i']'" + "`right'"
-				else ereturn local se_`:word `i' of `names'' = "`left'" + "`:di `sefmt' `rtable'[2, `i']'" + "`right'"
-				if "`tfmt'" == "" ereturn local t_`:word `i' of `names'' = "`left'" + "`=`rtable'[3, `i']'" + "`right'"
-				else ereturn local t_`:word `i' of `names'' = "`left'" + "`:di `tfmt' `rtable'[3, `i']'" + "`right'"
-			}
+			if "`bfmt'" == "" ereturn local b_`:word `i' of `names'' = "`=`rtable'[1, `i']'`addstar'"
+			else ereturn local b_`:word `i' of `names'' = "`:di `bfmt' `rtable'[1, `i']'`addstar'"
 		}
 	}
 end
