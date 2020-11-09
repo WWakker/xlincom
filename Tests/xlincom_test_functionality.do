@@ -537,5 +537,10 @@ reg gnp L(0/2).cpi
 xlincom (t = cpi) (t1 = cpi + l1.cpi) (t2 = cpi + l1.cpi + l2.cpi), repost
 esttab, eqlab("Main" "Sum of coefficients", span)
 
+sysuse auto
+reg price mpg foreign
+xlincom mpg + foreign, repost
+cap noisily xlincom mpg + foreign, repost
+assert _rc == 198
 
 di "All tests passed"

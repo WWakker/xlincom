@@ -174,6 +174,16 @@ program xlincom, eclass
 			local ++i
 		}
 		
+		// Check if coef doesn't exist already
+		if "`repost'" != "" {
+			foreach eqname of local eq_names {
+				if !missing(colnumb(`b', "xlincom:`eqname'")) {
+					di as error "{bf:xlincom:`eqname'} exists already"
+					exit 198
+				}
+			}
+		}
+		
 		// Fill VCOV matrix with covariances
 		if "`post'" != "" & "`covzero'" == "" & `n_lc' > 1 {
 			forval i = 1 / `n_lc' {
@@ -397,7 +407,7 @@ program xlincom_get_eq_vector, rclass
 				}
 			}
 			else if rownumb(`A',"``i''") == . {
-				di as error "{bf:``i''} not found in matrix e(V)"
+				di as error "{bf:``i''} not found in matrix e(b)"
 				exit 303
 			}
 			else { // If parameter in e(V)
