@@ -1,6 +1,7 @@
-*! 1.2.3                07nov2020
+*! 1.2.4                09nov2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.2.4     09nov2020   repost option added
 * 1.2.3     07nov2020   estadd option added
 * 1.2.2     03nov2020   eform option similar to lincom
 * 1.2.1     02nov2020   display options allowed
@@ -51,6 +52,7 @@ program xlincom, eclass
 		                                            Level(cilevel)       ///
 		                                            DF(numlist max=1 >0) ///
 		                                            POST                 ///
+		                                            REPOST               ///
 		                                            COVZERO              ///
 		                                            noHEADer             ///
 		                                            ESTADD(string asis)  ///
@@ -64,11 +66,17 @@ program xlincom, eclass
 				exit 198
 		}
 		
+		// Only post or repost allowed
+		if "`post'" != "" & "`repost'" != "" {
+			di as error "options {bf:post} and {bf:repost} not allowed together"
+			exit 198
+		}
+		
 		// Get additional display options
 		_get_diopts displayopts, `options'
 		
 		// Estadd only allowed when not posting results
-		if `"`estadd'"' != "" & "`post'" != "" {
+		if `"`estadd'"' != "" & ("`post'" != "" | "`repost'" != "") {
 			di as error "option {bf:estadd} not allowed when posting results"
 			exit 198
 		}
@@ -83,8 +91,9 @@ program xlincom, eclass
 		local name_eq_list "`s(name_eq_list)'"
 		local n_lc = s(n_lc)
 			
-		// Store e(V) matrix
-		tempname eV
+		// Store b and e(V) matrix
+		tempname b eV
+		mat `b' = e(b)
 		mat `eV' = e(V)
 		local rownames : rowfullnames `eV'
 		local n_eV = rowsof(`eV')
@@ -99,8 +108,17 @@ program xlincom, eclass
 		
 		// Define tempnames and matrices for results
 		tempname estimate se variance beta vcov
-		mat def `beta' = J(1, `n_lc',0)
-		mat def `vcov' = J(`n_lc',`n_lc',0)	
+		if "`repost'" == "" {
+			mat def `beta' = J(1, `n_lc', 0)
+			mat def `vcov' = J(`n_lc', `n_lc', 0)
+		}
+		else {
+			tempname betarepost vcovrepost
+			mat def `betarepost' = J(1, `n_eV' + `n_lc', 0)
+			mat def `vcovrepost' = J(`n_eV' + `n_lc', `n_eV' + `n_lc', 0)	
+			mat `betarepost'[1,1] = `b'
+			mat `vcovrepost'[1,1] = `eV'
+		}
 		
 		`dont' di
 		
@@ -112,11 +130,12 @@ program xlincom, eclass
 			local name "`s(eq_name)'"
 			local eq "`s(eq)'"
 			
-			xlincom_parse_eq_for_test "`eq'" "`post'" "`covzero'" "`n_lc'"
+			xlincom_parse_eq_for_test "`eq'" "`post'" "`repost'" "`covzero'" "`n_lc'"
 			qui lincom `s(eq_for_test)', level(`level') df(`df')
 			
 			`dont' di as txt %13s abbrev("`name':",13)  _column(16) as res "`eq' = 0"
-
+			
+			// Get estimates and variances
 			scalar `estimate' = r(estimate)
 			scalar `se' = r(se)
 			
@@ -128,14 +147,28 @@ program xlincom, eclass
 			}
 			
 			scalar `variance' = `se' * `se'
-			mat `beta'[1, `i'] = `estimate'
-			mat `vcov'[`i', `i'] = `variance'
+			
+			// Store results in matrices
+			if "`repost'" == "" {
+				mat `beta'[1, `i'] = `estimate'
+				mat `vcov'[`i', `i'] = `variance'
+			}
+			else {
+				mat `betarepost'[1, `i' + `n_eV'] = `estimate'
+				mat `vcovrepost'[`i' + `n_eV', `i' + `n_eV'] = `variance'
+			}
 			
 			// Get column vectors for covariance calculations
-			if "`post'" != "" & "`covzero'" == "" & `n_lc' > 1 {
+			if ("`post'" != "" & "`covzero'" == "" & `n_lc' > 1) | ("`repost'" != "" & "`covzero'" == "") {
 				xlincom_get_eq_vector `"`eq'"' `"`rownames'"' `n_eV'
-				tempname c`i'
-				mat `c`i'' = r(eq_vector)
+				if "`post'" != "" {
+					tempname c`i'
+					mat `c`i'' = r(eq_vector)
+				}
+				else {
+					tempname c`=`i'+`n_eV''
+					mat `c`=`i'+`n_eV''' = r(eq_vector)
+				}
 			}
 			
 			local ++i
@@ -147,14 +180,46 @@ program xlincom, eclass
 				forval j = 1 / `n_lc' {
 					if `i' != `j' mat `vcov'[`i',`j'] = `c`i''' * `eV' * `c`j''
 				}
-			}	
+			}
+		}
+		else if "`repost'" != "" & "`covzero'" == "" {
+			forval i = 1/`n_eV' {
+				tempname c`i'
+				mat `c`i'' = J(`n_eV', 1, 0)
+				mat `c`i''[`i', 1] = 1
+			}
+			forval i = 1/`=`n_lc'+`n_eV'' {
+				forval j = 1/`=`n_lc'+`n_eV'' {
+					if `i' != `j' & (`i' > `n_eV' | `j' > `n_eV') {
+						mat `vcovrepost'[`i',`j'] = `c`i''' * `eV' * `c`j''
+					}
+				}
+			}
 		}
 			
 		// Name rows/cols matrices
-		mat rownames `beta' = y1
-		mat colnames `beta' = `eq_names'
-		mat rownames `vcov' = `eq_names'
-		mat colnames `vcov' = `eq_names'
+		if "`repost'" == "" {
+			mat rownames `beta' = y1
+			mat colnames `beta' = `eq_names'
+			mat rownames `vcov' = `eq_names'
+			mat colnames `vcov' = `eq_names'
+		}
+		else {
+			local equations: coleq `b', quoted // Thanks to Ben Jann for these two lines
+			local equations: subinstr local equations `""_""' `""main""', all word
+			forval i = 1/`n_lc' {
+				local equations `"`equations' "xlincom""'
+			}
+			local names: colnames `b'
+			local names `names' `eq_names'
+			mat rownames `betarepost' = y1
+			mat colnames `betarepost' = `names'
+			mat coleq `betarepost' = `equations'
+			mat rownames `vcovrepost' = `names'
+			mat roweq `vcovrepost' = `equations'
+			mat colnames `vcovrepost' = `names'
+			mat coleq `vcovrepost' = `equations'
+		}
 	}
 	
 	// Eform options 
@@ -176,6 +241,16 @@ program xlincom, eclass
 		ereturn local predict "xlincom_p"
 		ereturn display, eform(`eform') level(`level') `displayopts'
 	}
+	else if "`repost'" != "" {
+		if "`e(cmd)'" == "regress" {
+			ereturn post `betarepost' `vcovrepost', noclear
+			ereturn display, eform(`eform') level(`level') `displayopts'
+		}
+		else {
+			ereturn repost b = `betarepost' V = `vcovrepost', resize
+			ereturn display, eform(`eform') level(`level') `displayopts'
+		}
+	}
 	else if replay() ereturn display, eform(`eform') level(`level') `displayopts'
 	else {
 		tempname hold
@@ -195,7 +270,8 @@ program xlincom, eclass
 			if `rc' exit `rc'
 			if `"`estadd'"' != "" {
 				xlincom_parse_estadd `estadd'
-				xlincom_estadd "`n_lc'" "`eq_names'" "`rtable'" "`s(star)'" "`s(se)'" "`s(t)'" "`s(p)'" "`s(ci)'" "`s(bfmt)'" "`s(sefmt)'" "`s(tfmt)'" "`s(pfmt)'" "`s(cifmt)'" "`s(left)'" "`s(right)'" `"`s(starlevels)'"'
+				xlincom_estadd "`n_lc'" "`eq_names'" "`rtable'" "`s(star)'" "`s(se)'" "`s(t)'" "`s(p)'" "`s(ci)'" "`s(bfmt)'" ///
+				               "`s(sefmt)'" "`s(tfmt)'" "`s(pfmt)'" "`s(cifmt)'" "`s(left)'" "`s(right)'" `"`s(starlevels)'"'
 			}
 		}
 	}
@@ -262,9 +338,9 @@ end
 // Return equation that is accepted by test
 program xlincom_parse_eq_for_test, sclass
 	version 8
-	args eq post covzero n_lc
+	args eq post repost covzero n_lc
 	
-	if "`post'" != "" & "`covzero'" == "" & `n_lc' > 1 {
+	if ("`post'" != "" & "`covzero'" == "" & `n_lc' > 1) | ("`repost'" != "" & "`covzero'" == "") {
 		gettoken first rest : eq , parse("()")
 		if `"`first'"' != `"`eq'"' {
 			di as error "parentheses not allowed in equation"
@@ -380,18 +456,18 @@ program xlincom_parse_estadd, sclass
 	version 8
 	syntax anything(id="star|nostar") [, SE                      ///
 	                                     T                       ///
-					                     P                       ///
-					                     CI                      ///
+	                                     P                       ///
+	                                     CI                      ///
 	                                     FMT(string)             ///
 	                                     BFMT(string)            /// 
-					                     SEFMT(string)           /// 
-					                     TFMT(string)            ///
-					                     PFMT(string)            ///
-					                     CIFMT(string)           ///
-					                     PARentheses             ///
-					                     BRAckets                ///
-					                     STARLevels(string asis) ///
-					                     ]
+	                                     SEFMT(string)           /// 
+	                                     TFMT(string)            ///
+	                                     PFMT(string)            ///
+	                                     CIFMT(string)           ///
+	                                     PARentheses             ///
+	                                     BRAckets                ///
+	                                     STARLevels(string asis) ///
+	                                     ]
 	
 	if !inlist("`anything'", "star", "nostar") {
 		di as error "{bf:star} or {bf:nostar} must be specified in option {bf:estadd}"
