@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2.2 03nov2020}{...}
+{* *! version 1.2.4 09nov2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
@@ -36,10 +36,11 @@ Multiple combinations
 {p 8 16 2}
 {cmd:xlincom} {cmd:(}[{it:name}=]{it:{helpb xlincom##exp:exp}}{cmd:)} [{cmd:(}[{it:name=}]{it:{helpb xlincom##exp:exp}}{cmd:)} ...] [{cmd:,} {it:options}]
 
-{synoptset 16}{...}
+{synoptset 37}{...}
 {synopthdr}
 {synoptline}
 {synopt :{opt post}}post estimation results{p_end}
+{synopt :{opt repost}}add results to estimates in memory{p_end}
 {synopt :{opt covzero}}set all covariances to zero{p_end}
 {synopt :{opt l:evel(#)}}set confidence level; default is {cmd:level(95)}{p_end}
 {synopt :{opt df(#)}}use t distribution with {it:#} degrees of freedom for
@@ -89,26 +90,36 @@ but {cmd:xlincom} is much faster (up to 300 times for complex models) and offers
 linear combination and extracts estimates and variances from its output.
 
 {pstd}
-If option {opt post} is specified, estimation results will be posted in {cmd:e()} for exporting with pretty tables
+If option {opt post} or {opt repost} is specified, estimation results will be posted in {cmd:e()} for exporting with pretty tables
 commands or subsequent testing. In this case {cmd:xlincom} also calculates covariances by default when multiple 
 combinations are specified, but this makes it about 2 times slower. Since {cmd:xlincom} is intended as a fast 
 alternative to {helpb nlcom:nlcom} for linear combinations, the option {opt covzero} may be specified. In 
 this case {cmd:xlincom} does not compute covariances, setting them to zero instead. If covariances are set to 
-zero the estimates of the transformations should not be tested against each other as that will yield invalid results.
+zero the estimates of the transformations should not be tested against other estimates as this will
+yield invalid results.
 
 
 {marker options}{...}
 {title:Options} 
 
 {phang}
-{opt post} posts estimation results in e() for exporting results to pretty tables
+{opt post} posts estimation results in e() for exporting results with pretty table commands
 or testing. The syntax is constrained if this option is specified for multiple combinations
 without {opt covzero}, see {helpb xlincom##remarks:remarks}.
 
 {phang}
+{opt repost} adds results to the estimates in memory. The syntax is constrained if {opt covzero} is 
+not specified, see {helpb xlincom##remarks:remarks}. If the estimates are from a 
+single equation model, the model estimates will be prefixed with "main" and the linear combinations 
+will be prefixed with "xlincom". In the case of a multiple equation model, the linear combinations will 
+be added with prefix "xlincom". This option is intended to make it easy to make tables combining
+model estimates and linear combinations of these estimates. It works only after estimation commands 
+that post results with {help ereturn:ereturn post}.
+
+{phang}
 {opt covzero} causes {cmd:xlincom} to set covariances to zero, which speeds it up
 by about two times, and the syntax will not be constrained. The transformations should
-not be tested against each other if this option is specified as that will yield invalid 
+not be tested against other estimates if this option is specified as that will yield invalid 
 results. 
 
 {phang}
@@ -135,7 +146,8 @@ for more information about these options.
 {title:Remarks}
 
 {pstd} 
-In the case of multiple combinations, if option {opt post} is not specified or {opt post} is 
+In the case of multiple combinations (or a single combination with option {opt repost}), 
+if option {opt post} or {opt repost} is not specified or {opt post} or {opt repost} is 
 specified together with option {opt covzero}, {cmd:xlincom} does not have to calculate covariances 
 and {cmd:xlincom} will accept any syntax that is valid for {helpb lincom:lincom}. However, if 
 covariances need to be calculated, {cmd:xlincom} needs to interpret the equations. {cmd:xlincom} 
@@ -146,7 +158,7 @@ division per parameter. For example, {cmd:2/3 * mpg} would be invalid. Instead, 
 or {cmd:mpg / 1.5}. Finally, parentheses and multiple subsequent addition/subtraction operators (--, +-, -+)
 are not allowed. It is possible to make use of the unconstrained syntax while still posting results 
 by specifying the {opt covzero} option. In this case the transformations should not be tested against
-each other as this will yield invalid results.
+other estimates as this will yield invalid results.
 
 
 {marker examples}{...}
@@ -171,6 +183,12 @@ each other as this will yield invalid results.
 {pstd}Estimate multiple linear combinations of coefficients, label transformations and post results{p_end}
 {phang2}{cmd:. qui regress y x1 x2 x3}{p_end}
 {phang2}{cmd:. xlincom (name1 = x2-x1) (name2 = 3*x1 + 500*x3) (name3 = 3*x1 + 500*x3 - 12), post}{p_end}
+
+{pstd}Add sum of coefficients to a formatted table using {bf:esttab}{p_end}
+{phang2}{cmd:. webuse gxmpl1}{p_end}
+{phang2}{cmd:. reg gnp L(0/2).cpi}{p_end}
+{phang2}{cmd:. xlincom (t = cpi) (t1 = cpi + l1.cpi) (t2 = cpi + l1.cpi + l2.cpi), repost}{p_end}
+{phang2}{cmd:. esttab, eqlabels("Main" "Sum of coefficients", span)}{p_end}
 
 
 {marker results}{...}
@@ -209,6 +227,11 @@ If option {opt post} is specified, {cmd:xlincom} stores the following in {cmd:e(
 {synopt:{cmd:e(sample)}}estimation sample{p_end}
 {p2colreset}{...}
 
+{pstd}
+If option {opt repost} is specified {cmd:xlincom} keeps the estimates in memory
+but changes {bf:e(b)} and {bf:e(V)} to include coefficients and variance/covariances
+of the linear combinations. 
+
 
 {marker acknowledgments}{...}
 {title:Acknowledgments}
@@ -216,6 +239,10 @@ If option {opt post} is specified, {cmd:xlincom} stores the following in {cmd:e(
 {pstd} 
 I would like to thank Roger Newson, as some of the code of {cmd:xlincom} 
 is based on the code of his command {cmd:lincomest}. 
+
+{pstd} 
+I would also like to thank Ben Jann, who pointed me towards the strategy to add
+results to the estimates in memory which led to the {opt repost} option. 
 
 {pstd}
 Since much of {cmd:xlincom}'s options are the same as {cmd:lincom}'s I have 
