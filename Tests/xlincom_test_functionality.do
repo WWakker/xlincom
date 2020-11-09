@@ -428,7 +428,7 @@ confirm number `e(b_name)'
 cap noisily xlincom name=mpg, estadd(, se)
 assert _rc == 100
 
-// starlevels suboption
+// Starlevels suboption
 discard
 reg price mpg weight headroom
 xlincom name=weight, estadd(star, se t)
@@ -443,8 +443,6 @@ assert _rc == 198
 cap noisily xlincom (weight) (mpg) (headroom), estadd(star, se t par starlevels(*** "string" ** .1))
 assert _rc == 7
 
-// 
-discard
 reg price mpg weight headroom
 xlincom (mpg=mpg) (weight=weight) (headroom=headroom), estadd(star, se t ci par starlevels(* .1 ** .05 *** .01) cifmt(%2.1f))
 esttab, starlevels(* .1 ** .05 *** .01) stats(b_mpg ci_mpg _ b_weight ci_weight _ b_headroom ci_headroom)
@@ -452,5 +450,97 @@ esttab, starlevels(* .1 ** .05 *** .01) stats(b_mpg ci_mpg _ b_weight ci_weight 
 reg price i.foreign mpg
 xlincom (price_dom = _cons) (price_for = _cons + 1.foreign), estadd(star, se par bfmt(%4.1f) sefmt(%4.2f) starlevels(* .1 ** .05 *** .01))
 esttab, stats(b_price_dom se_price_dom _ b_price_for se_price_for ,star(r2_a)) starlevels(* .1 ** .05 *** .01)
+
+// Repost
+sysuse auto, clear
+qui reg price mpg weight headroom i.foreign i.rep78
+
+cap noisily xlincom mpg, post repost
+assert _rc == 198
+
+qui reg price mpg weight
+cap noisily xlincom name = mpg + (weight), repost
+assert _rc == 198
+
+qui reg price mpg weight
+xlincom (name = mpg + weight) , repost
+
+qui reg price mpg weight
+cap noisily xlincom (name = mpg + (weight)) (mpg), repost
+assert _rc == 198
+
+qui reg price mpg weight
+cap noisily xlincom (name = mpg + (weight)) mpg, repost
+assert _rc == 198
+
+qui reg price mpg weight
+xlincom (name = mpg + (weight)) (mpg), repost covzero
+mat A = e(V)
+qui reg price mpg weight
+xlincom (name = mpg + weight) (mpg), repost
+mat B = e(V)
+di mreldif(A, B)
+
+qui reg price mpg weight
+nlcom (_b[mpg] + _b[weight]) (_b[mpg]), post
+mat C = e(V)
+mat l B
+mat l C
+
+webuse lbw, clear
+qui logit low age lwt i.race smoke ptl ht ui
+nlcom (_b[2.race]+_b[smoke]) (_b[3.race] - 1.5 * _b[ui]) (_b[3.race] - 1.5 * _b[ui]), post
+mat A = e(V)
+qui logit low age lwt i.race smoke ptl ht ui
+xlincom (2.race+smoke) (3.race - 1.5 * ui) (3.race - 1.5 * ui), post
+mat B = e(V)
+di mreldif(A,B)
+assert mreldif(A, B) <1e-10
+logit low age lwt i.race smoke ptl ht ui
+xlincom (2.race+smoke) (3.race - 1.5 * ui) (3.race - 1.5 * ui), repost
+mat C = e(V)
+mat l A
+mat l C
+
+webuse nhanes2f
+svyset psuid [pweight=finalwgt], strata(stratid)
+qui svy: regress zinc age age2 weight female black orace rural
+nlcom (_b[age] + _b[age2]) (2 * _b[age] - _b[female] / 1.5 - 1) (2 * _b[black] - _b[rural] + 1 / 1.5 - 1), post
+mat NL = e(V)
+svy: regress zinc age age2 weight female black orace rural
+xlincom (age + age2) (2 * age - female / 1.5 - 1) (2 * black - rural + 1 / 1.5 - 1), repost
+mat L = e(V)
+mat l NL
+mat l L
+
+sysuse auto
+sureg (price foreign weight length) (mpg foreign weight) (displ foreign weight)
+nlcom (-_b[price:foreign] / 2 + 2) (-_b[price:foreign] / -2 + 2) (-_b[mpg:_cons] + _b[displacement:weight] / 1.5), post
+mat NL = e(V)
+qui sureg (price foreign weight length) (mpg foreign weight) (displ foreign weight)
+xlincom (-price:foreign / 2 + 2) (name=-price:foreign / -2 + 2) (-mpg:_cons + displacement:weight / 1.5), repost 
+mat L = e(V)
+mat l NL
+mat l L
+
+qui reg price mpg weight headroom i.foreign i.rep78
+qui xlincom (mpg) (mpg + weight) (mpg - weight) (2 * mpg - weight) (2 - 1.foreign) (1.foreign / 2 + 2), repost
+mat A = e(V)
+
+qui reg price mpg weight headroom i.foreign i.rep78
+test (mpg = 0) (weight = 0) (headroom = 0) (0b.foreign = 0) (1.foreign = 0) (1b.rep78 = 0) (2.rep78 = 0) (3.rep78 = 0) (4.rep78 = 0) (5.rep78 = 0) (_cons = 0) (mpg = 0) (mpg + weight = 0) (mpg - weight = 0) (2 * mpg - weight = 0) (2 - 1.foreign = 0) (1.foreign / 2 + 2 = 0),  matvlc(B)
+di mreldif(A, B)
+assert mreldif(A, B) <1e-10
+
+webuse gxmpl1
+reg gnp L(0/2).cpi
+xlincom (t = cpi) (t1 = cpi + l1.cpi) (t2 = cpi + l1.cpi + l2.cpi), repost
+esttab, eqlab("Main" "Sum of coefficients", span)
+
+sysuse auto
+reg price mpg foreign
+xlincom mpg + foreign, repost
+cap noisily xlincom mpg + foreign, repost
+assert _rc == 198
 
 di "All tests passed"
