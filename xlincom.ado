@@ -253,12 +253,10 @@ program xlincom, eclass
 		ereturn display, eform(`eform') level(`level') `displayopts'
 	}
 	else if "`repost'" != "" {
-		if "`e(cmd)'" == "regress" | ("`e(cmd)'" == "xtreg" & "`e(model)'" == "fe") {
-			ereturn post `betarepost' `vcovrepost', noclear
-			ereturn display, eform(`eform') level(`level') `displayopts'
-		}
+		cap ereturn repost b = `betarepost' V = `vcovrepost', resize
+		if !_rc ereturn display, eform(`eform') level(`level') `displayopts'
 		else {
-			ereturn repost b = `betarepost' V = `vcovrepost', resize
+			ereturn post `betarepost' `vcovrepost', noclear
 			ereturn display, eform(`eform') level(`level') `displayopts'
 		}
 	}

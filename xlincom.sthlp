@@ -113,8 +113,7 @@ not specified, see {helpb xlincom##remarks:remarks}. If the estimates in memory 
 single equation model, the model estimates will be prefixed with equation name "main" and the linear combinations 
 will be prefixed with equation name "xlincom". In the case of a multiple equation model, the linear combinations will 
 be added with equation name "xlincom". This option is intended to make it easy to make tables combining
-model estimates and linear combinations of these estimates. It works only after estimation commands 
-that post results with {help ereturn:ereturn post}.
+model estimates and linear combinations of these estimates.
 
 {phang}
 {opt covzero} sets covariances to zero which speeds it up by about two times, and the syntax will 
