@@ -254,7 +254,7 @@ program xlincom, eclass
 	}
 	else if "`repost'" != "" {
 		cap ereturn repost b = `betarepost' V = `vcovrepost', resize
-		if !_rc ereturn post `betarepost' `vcovrepost', noclear
+		if _rc ereturn post `betarepost' `vcovrepost', noclear
 		ereturn display, eform(`eform') level(`level') `displayopts'
 
 	}
