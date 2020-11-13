@@ -1,4 +1,4 @@
-*! 1.2.5                12nov2020
+*! 1.2.5                13nov2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
 * 1.2.5     13nov2020   repost option supported for most if not all estimation commands
