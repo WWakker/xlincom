@@ -1,7 +1,7 @@
 *! 1.2.5                12nov2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
-* 1.2.5     12nov2020   ereturn post, noclear used for xtreg,fe with repost option
+* 1.2.5     13nov2020   repost option supported for most if not all estimation commands
 * 1.2.4     09nov2020   repost option added
 * 1.2.3     07nov2020   estadd option added
 * 1.2.2     03nov2020   eform option similar to lincom
