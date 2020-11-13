@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2.2 03nov2020}{...}
+{* *! version 1.2.5 12nov2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
@@ -110,7 +110,7 @@ without {opt covzero}, see {helpb xlincom##remarks:remarks}.
 {phang}
 {opt repost} adds results to the estimates in memory. The syntax is constrained if {opt covzero} is 
 not specified, see {helpb xlincom##remarks:remarks}. If the estimates in memory are from a 
-single equation model, the model estimates will be prefixed with equation name "main" and the linear combinations 
+single equation model, the model estimates will be prefixed with equation name "Main" and the linear combinations 
 will be prefixed with equation name "xlincom". In the case of a multiple equation model, the linear combinations will 
 be added with equation name "xlincom". This option is intended to make it easy to make tables combining
 model estimates and linear combinations of these estimates.

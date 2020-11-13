@@ -217,7 +217,7 @@ program xlincom, eclass
 		}
 		else {
 			local equations: coleq `b', quoted // Thanks to Ben Jann for these two lines
-			local equations: subinstr local equations `""_""' `""main""', all word
+			local equations: subinstr local equations `""_""' `""Main""', all word
 			forval i = 1/`n_lc' {
 				local equations `"`equations' "xlincom""'
 			}
@@ -254,11 +254,9 @@ program xlincom, eclass
 	}
 	else if "`repost'" != "" {
 		cap ereturn repost b = `betarepost' V = `vcovrepost', resize
-		if !_rc ereturn display, eform(`eform') level(`level') `displayopts'
-		else {
-			ereturn post `betarepost' `vcovrepost', noclear
-			ereturn display, eform(`eform') level(`level') `displayopts'
-		}
+		if !_rc ereturn post `betarepost' `vcovrepost', noclear
+		ereturn display, eform(`eform') level(`level') `displayopts'
+
 	}
 	else if replay() ereturn display, eform(`eform') level(`level') `displayopts'
 	else {
