@@ -179,7 +179,7 @@ program xlincom, eclass
 		if "`repost'" != "" {
 			foreach eqname of local eq_names {
 				if !missing(colnumb(`b', "xlincom:`eqname'")) {
-					di as error "{bf:xlincom:`eqname'} exists already"
+					di as error "{bf:xlincom:`eqname'} exists already in {bf:e(b)}"
 					exit 198
 				}
 			}
