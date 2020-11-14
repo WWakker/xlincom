@@ -256,7 +256,6 @@ program xlincom, eclass
 		cap ereturn repost b = `betarepost' V = `vcovrepost', resize
 		if _rc ereturn post `betarepost' `vcovrepost', noclear
 		ereturn display, eform(`eform') level(`level') `displayopts'
-
 	}
 	else if replay() ereturn display, eform(`eform') level(`level') `displayopts'
 	else {
