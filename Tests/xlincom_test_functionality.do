@@ -1,5 +1,5 @@
 *********************************
-** XLINCOM FUNCTIONALITY TESTS **
+** xlincom FUNCTIONALITY TESTS **
 *********************************
 
 discard
@@ -77,8 +77,7 @@ qui reg price mpg weight
 xlincom (name = mpg + (weight)), post
 
 qui reg price mpg weight
-cap noisily xlincom (name = mpg + (weight)) (mpg), post
-assert _rc == 198
+xlincom (name = mpg + (weight)) (mpg), post
 
 qui reg price mpg weight
 cap noisily xlincom (name = mpg + (weight)) mpg, post
@@ -121,12 +120,10 @@ cap noisily xlincom (name= mpg) (weight = weight1 * 2), post
 assert _rc == 111
 
 qui reg price mpg weight
-cap noisily xlincom (name= mpg) (_b[weight] * 2), post
-assert _rc == 303
+xlincom (name= mpg) (_b[weight] * 2), post
 
 qui reg price mpg weight
-cap noisily xlincom (name= mpg) (name= mpg) (_b[weight] * 2), post
-assert _rc == 303
+xlincom (name= mpg) (name= mpg) (_b[weight] * 2), post
 
 qui reg price mpg weight
 xlincom (name= mpg) (name= mpg) (_b[weight] * 2), post covzero
@@ -135,12 +132,10 @@ qui reg price mpg weight
 xlincom (name= mpg) (name= mpg) (weight * 2), post 
 
 qui reg price mpg weight
-cap noisily xlincom (mpg * (2+3)) (name= mpg) (weight * 2), post 
-assert _rc == 198
+xlincom (mpg * (2+3)) (name= mpg) (weight * 2), post 
 
 qui reg price mpg weight
-cap noisily xlincom (name= mpg * (2+3)) (name= mpg) (weight * 2), post 
-assert _rc == 198
+xlincom (name= mpg * (2+3)) (name= mpg) (weight * 2), post 
 
 ** Syntax options
 qui reg price mpg weight

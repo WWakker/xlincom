@@ -1,6 +1,7 @@
-*! 1.2.5                13nov2020
+*! 1.2.6                27nov2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.2.6     27nov2020   test used to calculate covariances
 * 1.2.5     13nov2020   repost option supported for most if not all estimation commands
 * 1.2.4     09nov2020   repost option added
 * 1.2.3     07nov2020   estadd option added
@@ -63,8 +64,8 @@ program xlincom, eclass
 		// Only one display option allowed
 		local eformopt : word count `eform' `or' `hr' `shr' `irr' `rrr' 
 		if `eformopt' > 1 {
-				di as error "only one display option can be specified"
-				exit 198
+			di as error "only one display option can be specified"
+			exit 198
 		}
 		
 		// Only post or repost allowed
@@ -77,11 +78,13 @@ program xlincom, eclass
 		_get_diopts displayopts, `options'
 		
 		// Estadd only allowed when not posting results
-		if `"`estadd'"' != "" & ("`post'" != "" | "`repost'" != "") {
-			di as error "option {bf:estadd} not allowed when posting results"
-			exit 198
+		if `"`estadd'"' != "" {
+			if "`post'`repost'" != "" {
+				di as error "option {bf:estadd} not allowed when posting results"
+				exit 198
+			}
+			xlincom_parse_estadd `estadd'
 		}
-		if `"`estadd'"' != "" xlincom_parse_estadd `estadd'
 		
 		// Header option
 		if "`header'" != "" local dont *
@@ -101,15 +104,16 @@ program xlincom, eclass
 		
 		// Extract estimation output (code based on Roger Newson's lincomest.ado)
 		local depname = e(depvar)
-		tempvar esample
 		local obs = e(N)
 		if "`df'" == "" local dof = e(df_r)
 		else local dof = `df' 
+		tempvar esample
 		gen byte `esample' = e(sample)
 		
 		// Define tempnames and matrices for results
-		tempname estimate se variance beta vcov
+		tempname estimate se variance
 		if "`repost'" == "" {
+			tempname beta vcov
 			mat def `beta' = J(1, `n_lc', 0)
 			mat def `vcov' = J(`n_lc', `n_lc', 0)
 		}
@@ -123,16 +127,21 @@ program xlincom, eclass
 		
 		`dont' di
 		
-		// Start execution
+		// Call lincom for each equation, extract output
 		local i 1
 		foreach name_eq of local name_eq_list {
+			
+			// Parse name/eq, return name and equation for display
 			xlincom_parse_name_eq `"`name_eq'"' `i'
 			local eq_names "`eq_names' `s(eq_name)'"
 			local name "`s(eq_name)'"
 			local eq "`s(eq)'"
 			
-			xlincom_parse_eq_for_test "`eq'" "`post'" "`repost'" "`covzero'" "`n_lc'"
-			qui lincom `s(eq_for_test)', level(`level') df(`df')
+			// Parse equation, return proper equation for test in case of multiple equation models
+			xlincom_parse_eq_for_test "`eq'"
+			if "`post'`repost'" != "" & "`covzero'" == "" local eqs_for_cov "`eqs_for_cov' (`s(eq_for_test)' = 0)"
+			
+			qui lincom `s(eq_for_test)'
 			
 			`dont' di as txt %13s abbrev("`name':",13)  _column(16) as res "`eq' = 0"
 			
@@ -159,52 +168,29 @@ program xlincom, eclass
 				mat `vcovrepost'[`i' + `n_eV', `i' + `n_eV'] = `variance'
 			}
 			
-			// Get column vectors for covariance calculations
-			if ("`post'" != "" & "`covzero'" == "" & `n_lc' > 1) | ("`repost'" != "" & "`covzero'" == "") {
-				xlincom_get_eq_vector `"`eq'"' `"`rownames'"' `n_eV'
-				if "`post'" != "" {
-					tempname c`i'
-					mat `c`i'' = r(eq_vector)
-				}
-				else {
-					tempname c`=`i'+`n_eV''
-					mat `c`=`i'+`n_eV''' = r(eq_vector)
-				}
-			}
-			
 			local ++i
 		}
 		
-		// Check if coef doesn't exist already
+		// Check if coef doesn't already exist in e(b) for repost
 		if "`repost'" != "" {
 			foreach eqname of local eq_names {
 				if !missing(colnumb(`b', "xlincom:`eqname'")) {
-					di as error "{bf:xlincom:`eqname'} exists already in {bf:e(b)}"
+					di as error "{bf:xlincom:`eqname'} already exists in {bf:e(b)}"
 					exit 198
 				}
 			}
 		}
 		
 		// Fill VCOV matrix with covariances
-		if "`post'" != "" & "`covzero'" == "" & `n_lc' > 1 {
-			forval i = 1 / `n_lc' {
-				forval j = 1 / `n_lc' {
-					if `i' != `j' mat `vcov'[`i',`j'] = `c`i''' * `eV' * `c`j''
-				}
+		if "`covzero'" == "" & "`post'`repost'" != "" {
+			if "`post'" != "" & `n_lc' > 1 {
+				qui test `eqs_for_cov', matvlc(`vcov')
 			}
-		}
-		else if "`repost'" != "" & "`covzero'" == "" {
-			forval i = 1/`n_eV' {
-				tempname c`i'
-				mat `c`i'' = J(`n_eV', 1, 0)
-				mat `c`i''[`i', 1] = 1
-			}
-			forval i = 1/`=`n_lc'+`n_eV'' {
-				forval j = 1/`=`n_lc'+`n_eV'' {
-					if `i' != `j' & (`i' > `n_eV' | `j' > `n_eV') {
-						mat `vcovrepost'[`i',`j'] = `c`i''' * `eV' * `c`j''
-					}
+			else if "`repost'" != "" {
+				foreach rowname of local rownames {
+					local params_for_cov "`params_for_cov' (_b[`rowname'] = 0)"
 				}
+				qui test `params_for_cov' `eqs_for_cov', matvlc(`vcovrepost')
 			}
 		}
 			
@@ -245,7 +231,7 @@ program xlincom, eclass
 	
 	di
 	
-	// Display and post results
+	// Post and display results
 	if "`post'" != "" {
 		ereturn post `beta' `vcov' , depname("`depname'") obs(`obs') dof(`dof') esample(`esample')
 		ereturn local cmd "xlincom"
@@ -275,7 +261,6 @@ program xlincom, eclass
 			_estimates unhold `hold'
 			if `rc' exit `rc'
 			if `"`estadd'"' != "" {
-				xlincom_parse_estadd `estadd'
 				xlincom_estadd "`n_lc'" "`eq_names'" "`rtable'" "`s(star)'" "`s(se)'" "`s(t)'" "`s(p)'" "`s(ci)'" "`s(bfmt)'" ///
 				               "`s(sefmt)'" "`s(tfmt)'" "`s(pfmt)'" "`s(cifmt)'" "`s(left)'" "`s(right)'" `"`s(starlevels)'"'
 			}
@@ -344,15 +329,8 @@ end
 // Return equation that is accepted by test
 program xlincom_parse_eq_for_test, sclass
 	version 8
-	args eq post repost covzero n_lc
-	
-	if ("`post'" != "" & "`covzero'" == "" & `n_lc' > 1) | ("`repost'" != "" & "`covzero'" == "") {
-		gettoken first rest : eq , parse("()")
-		if `"`first'"' != `"`eq'"' {
-			di as error "parentheses not allowed in equation"
-			exit 198
-		}
-	}
+	args eq
+
 	gettoken first rest : eq , parse(":")
 	if `"`first'"' == `"`eq'"' local eq_for_test `"`eq'"'
 	else {
@@ -371,90 +349,6 @@ program xlincom_parse_eq_for_test, sclass
 	}
 	
 	sreturn local eq_for_test `eq_for_test'
-end
-
-
-// Parse equation when post option is specified
-// Return matrix for covariance calculations
-program xlincom_get_eq_vector, rclass
-	version 8
-	args eq rownames n
-	
-	tempname A
-	mat `A' = J(`n',1,0)
-	mat rownames `A' = `rownames'
-	tokenize `eq', parse("+-*/")
-	local 0
-	local i 1
-	while "``i''" != "" {
-		local `i' = strtrim("``i''")
-		cap confirm number ``i''
-		if _rc {
-			if inlist("``i''", "+", "-") {
-				if inlist("``=`i'+1''", "-", "+") { 
-					di as error "++, --, +-, -+ not allowed"
-					exit 198
-				}
-			}
-			else if inlist("``i''", "*", "/") {
-				 if inlist("``=`i'+2''", "*", "/") | inlist("``=`i'+3''", "*", "/") { 
-					di as error "maximum number of multiplications/divisions per estimate = 1"
-					exit 198
-				}
-			}
-			else if rownumb(`A',"``i''") == . {
-				di as error "{bf:``i''} not found in matrix e(b)"
-				exit 303
-			}
-			else { // If parameter in e(V)
-				if inlist("``=`i'-1''", "+", "-", "") { 
-					if inlist("``=`i'+1''", "+", "-", "") {
-						if "``=`i'-1''" == "-" {
-							if "``=`i'-2''" == "*" {
-								if "``=`i'-4''" == "-" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + ``=`i'-3''
-								else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - ``=`i'-3''
-							}
-							else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - 1
-						}
-						else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + 1
-					}
-					else if inlist("``=`i'+1''", "*", "/") {
-						if "``=`i'+1''" == "*" {
-							if "``=`i'-1''" == "-" {
-								if "``=`i'+2''" == "-" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + ``=`i'+3''
-								else if "``=`i'+2''" == "+" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - ``=`i'+3''
-								else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - ``=`i'+2''
-							}
-							else {
-								if "``=`i'+2''" == "-" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - ``=`i'+3''
-								else if "``=`i'+2''" == "+" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + ``=`i'+3''
-								else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + ``=`i'+2''
-							}
-						}
-						else if "``=`i'+1''" == "/" {
-							if "``=`i'-1''" == "-" {
-								if "``=`i'+2''" == "-" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + 1 / ``=`i'+3''
-								else if "``=`i'+2''" == "+" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - 1 / ``=`i'+3''
-								else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - 1 / ``=`i'+2''
-							}
-							else {
-								if "``=`i'+2''" == "-" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - 1 / ``=`i'+3''
-								else if "``=`i'+2''" == "+" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + 1 / ``=`i'+3''
-								else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + 1 / ``=`i'+2''
-							}
-						}
-					}
-				}
-				else if "``=`i'-1''" == "*" {
-					if "``=`i'-3''" == "-" mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] - ``=`i'-2''
-					else mat `A'[rownumb(`A',"``i''"),1] = `A'[rownumb(`A',"``i''"),1] + ``=`i'-2''
-				}
-			}				
-		}
-		local ++i
-	}
-	
-	return matrix eq_vector = `A'
 end
 
 // Parser for estadd option to check of everything is specified properly
