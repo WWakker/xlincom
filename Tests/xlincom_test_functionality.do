@@ -345,11 +345,11 @@ xlincom (price: foreign * (2 + 2) + mpg :foreign / 3)
 xlincom ([price]foreign * (2 + 2) + [mpg]foreign / 3), post
 
 qui sureg (price foreign weight length) (mpg foreign weight)
-cap noisily xlincom ([price]foreign * (2 + 2) + [mpg]foreign / 3) ([mpg]foreign), post
-assert _rc == 198
-cap noisily xlincom ([price]foreign * 4 + [mpg]foreign / 3) ([mpg]foreign), post
-assert _rc == 303
+xlincom ([price]foreign * (2 + 2) + [mpg]foreign / 3) ([mpg]foreign), post
+qui sureg (price foreign weight length) (mpg foreign weight)
+xlincom ([price]foreign * 4 + [mpg]foreign / 3) ([mpg]foreign), post
 
+qui sureg (price foreign weight length) (mpg foreign weight)
 xlincom (price:foreign * 4 + mpg:foreign / 3), post
 
 qui sureg (price foreign weight length) (mpg foreign weight)
@@ -370,16 +370,13 @@ qui sureg (price foreign weight length) (mpg foreign weight)
 xlincom (_b[price:foreign] * 4 + _b[mpg:foreign] / 3), post
 
 qui sureg (price foreign weight length) (mpg foreign weight)
-cap noisily xlincom (_b[price:foreign] * 4 + _b[mpg:foreign] / 3) (price:foreign), post
-assert _rc == 303
+xlincom (_b[price:foreign] * 4 + _b[mpg:foreign] / 3) (price:foreign), post
 
 qui sureg (price foreign weight length) (mpg foreign weight)
-cap noisily xlincom ([price]foreign * 4 + _b[mpg:] / 3) (price:foreign), post 
-assert _rc == 303
+xlincom ([price]foreign * 4 + _b[mpg:] / 3) (price:foreign), post 
 
 qui sureg (price foreign weight length) (mpg foreign weight)
-cap noisily xlincom (price:foreign * 4 + _b[mpg:] / 3) (price:foreign), post 
-assert _rc == 303
+xlincom (price:foreign * 4 + _b[mpg:] / 3) (price:foreign), post 
 
 qui sureg (price foreign weight length) (mpg foreign weight)
 cap noisily xlincom (price * 4 + _b[mpg] / 3) (price:foreign), post 
@@ -389,8 +386,7 @@ qui sureg (price foreign weight length) (mpg foreign weight)
 xlincom (price:foreign * (2+2) + mpg:foreign / 3) (price:foreign), post covzero
 
 qui sureg (price foreign weight length) (mpg foreign weight)
-cap noisily xlincom (price:foreign * (2+2) + mpg:foreign / 3) (price:foreign), post
-assert _rc == 198
+xlincom (price:foreign * (2+2) + mpg:foreign / 3) (price:foreign), post
 
 qui sureg (price foreign weight length) (mpg foreign weight)
 xlincom ((price:foreign + price:weight) * 2), post covzero
@@ -454,15 +450,13 @@ cap noisily xlincom mpg, post repost
 assert _rc == 198
 
 qui reg price mpg weight
-cap noisily xlincom name = mpg + (weight), repost
-assert _rc == 198
+xlincom name = mpg + (weight), repost
 
 qui reg price mpg weight
 xlincom (name = mpg + weight) , repost
 
 qui reg price mpg weight
-cap noisily xlincom (name = mpg + (weight)) (mpg), repost
-assert _rc == 198
+xlincom (name = mpg + (weight)) (mpg), repost
 
 qui reg price mpg weight
 cap noisily xlincom (name = mpg + (weight)) mpg, repost

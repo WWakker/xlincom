@@ -261,6 +261,7 @@ program xlincom, eclass
 			_estimates unhold `hold'
 			if `rc' exit `rc'
 			if `"`estadd'"' != "" {
+				xlincom_parse_estadd `estadd'
 				xlincom_estadd "`n_lc'" "`eq_names'" "`rtable'" "`s(star)'" "`s(se)'" "`s(t)'" "`s(p)'" "`s(ci)'" "`s(bfmt)'" ///
 				               "`s(sefmt)'" "`s(tfmt)'" "`s(pfmt)'" "`s(cifmt)'" "`s(left)'" "`s(right)'" `"`s(starlevels)'"'
 			}
@@ -394,7 +395,7 @@ program xlincom_parse_estadd, sclass
 		local tfmt `fmt'
 	}
 	
-	if "`parentheses'" != "" | "`brackets'" != "" {
+	if "`parentheses'`brackets'" != "" {
 		if "`parentheses'" != "" {
 			local left "("
 			local right ")"

@@ -1,11 +1,13 @@
-use data_for_tests.dta
+*use data_for_tests.dta
 set matsize 11000
 
 *************************************************
 * Test 1: nlcom vs xlincom without post option **
 *************************************************
 
-local iter 100
+local iter 10
+cap drop nlcom*
+cap drop xlincom*
 gen nlcom_xt = .
 gen xlincom_xt = .
 gen nlcom_reg = .
@@ -57,10 +59,14 @@ forval i = 1/`iter' {
 	qui replace xlincom_reg = `r(t2)' in `i'
 }
 ttest nlcom_xt == xlincom_xt
+local mu1 = r(mu_1)
+local mu2 = r(mu_2)
 di "On average, xlincom is " `r(mu_1)' / `r(mu_2)' " times faster than nlcom after xtreg, fe"
 // On average, xlincom is 288.05939 times faster than nlcom after xtreg, fe
 
 ttest nlcom_reg == xlincom_reg
+local mu3 = r(mu_1)
+local mu4 = r(mu_2)
 di "On average, xlincom is " `r(mu_1)' / `r(mu_2)' " times faster than nlcom after reg"
 // On average, xlincom is 25.834061 times faster than nlcom after reg
 
@@ -69,7 +75,6 @@ di "On average, xlincom is " `r(mu_1)' / `r(mu_2)' " times faster than nlcom aft
 ****************************************************
 
 cap drop cov*
-local iter 100
 gen cov_xt = .
 gen covzero_xt = .
 gen cov_reg = .
@@ -121,10 +126,14 @@ forval i = 1/`iter' {
 	qui replace covzero_reg = `r(t2)' in `i'
 }
 ttest cov_xt == covzero_xt
+local mu5 = r(mu_1)
+local mu6 = r(mu_2)
 di "On average, xlincom without COV is " `r(mu_1)' / `r(mu_2)' " times faster than xlincom with COV after xtreg"
 // On average, xlincom without COV is 2.5765623 times faster than xlincom with COV after xtreg
 
 ttest cov_reg == covzero_reg
+local mu7 = r(mu_1)
+local mu8 = r(mu_2)
 di "On average, xlincom without COV is " `r(mu_1)' / `r(mu_2)' " times faster than xlincom with COV after reg"
 // On average, xlincom without COV is 1.5474876 times faster than xlincom wit COV after reg
 
@@ -133,7 +142,6 @@ di "On average, xlincom without COV is " `r(mu_1)' / `r(mu_2)' " times faster th
 * Test 3: nlcom vs xlincom with post option **
 **********************************************
 
-local iter 100
 cap drop *post
 gen nlcom_xt_post = .
 gen xlincom_xt_post = .
@@ -190,9 +198,29 @@ forval i = 1/`iter' {
 	qui replace xlincom_reg_post = `r(t2)' in `i'
 }
 ttest nlcom_xt_post == xlincom_xt_post
+local mu9 = r(mu_1)
+local mu10 = r(mu_2)
+
 di "On average, xlincom is " `r(mu_1)' / `r(mu_2)' " times faster than nlcom after xtreg, fe with post option"
 // On average, xlincom is 138.3159 times faster than nlcom after xtreg, fe with post option
 
 ttest nlcom_reg_post == xlincom_reg_post
+local mu11 = r(mu_1)
+local mu12 = r(mu_2)
 di "On average, xlincom is " `r(mu_1)' / `r(mu_2)' " times faster than nlcom after reg with post option"
 // On average, xlincom is 28.529706 times faster than nlcom after reg with post option
+
+
+********************************************************************************************************
+di "On average, xlincom is " `mu1' / `mu2' " times faster than nlcom after xtreg, fe"
+// On average, xlincom is 481.37853 times faster than nlcom after xtreg, fe
+di "On average, xlincom is " `mu3' / `mu4' " times faster than nlcom after reg"
+// On average, xlincom is 44.057831 times faster than nlcom after reg
+di "On average, xlincom without COV is " `mu5' / `mu6' " times faster than xlincom with COV after xtreg"
+// On average, xlincom without COV is 1.0759637 times faster than xlincom with COV after xtreg
+di "On average, xlincom without COV is " `mu7' / `mu8' " times faster than xlincom with COV after reg"
+// On average, xlincom without COV is 1.0734597 times faster than xlincom with COV after reg
+di "On average, xlincom is " `mu9' / `mu10' " times faster than nlcom after xtreg, fe with post option"
+// On average, xlincom is 445.6045 times faster than nlcom after xtreg, fe with post option
+di "On average, xlincom is " `mu11' / `mu12' " times faster than nlcom after reg with post option"
+// On average, xlincom is 37.513393 times faster than nlcom after reg with post option
