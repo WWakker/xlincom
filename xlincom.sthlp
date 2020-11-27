@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2.5 12nov2020}{...}
+{* *! version 1.2.6 27nov2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
@@ -71,10 +71,7 @@ Multiple combinations
 
 {pstd}
 {it:exp} is any linear combination of coefficients that is valid
-syntax for {helpb lincom:lincom}. The exception is when posting or reposting results
-without specifying option {opt covzero}, see {helpb xlincom##remarks:remarks}. 
-In this case coefficients must be specified as they are found in matrix {cmd:e(b)} and the 
-expression cannot contain parentheses. An optional {it:name} may be specified to label 
+syntax for {helpb lincom:lincom}. An optional {it:name} may be specified to label 
 the transformation; {it:name} can be any {help reswords:valid Stata name}. 
 
 
@@ -85,9 +82,9 @@ the transformation; {it:name} can be any {help reswords:valid Stata name}.
 {cmd:xlincom} computes point estimates, standard errors, t or z statistics,
 p-values, and confidence intervals for single or multiple linear combinations of coefficients 
 as well as covariances in the case of multiple combinations. {helpb nlcom:nlcom} can also do this, 
-but {cmd:xlincom} is much faster (up to 300 times for complex models) and offers the same syntax as 
-{helpb lincom:lincom} in most cases. {cmd:xlincom} internally calls {helpb lincom:lincom} for each 
-linear combination and extracts estimates and variances from its output.
+but {cmd:xlincom} is much faster and offers the same syntax as {helpb lincom:lincom}. {cmd:xlincom} 
+internally calls {helpb lincom:lincom} for each linear combination and extracts 
+estimates and variances from its output.
 
 {pstd}
 If option {opt post} or {opt repost} is specified, estimation results will be posted in {cmd:e()} 
@@ -104,20 +101,18 @@ yield invalid results.
 
 {phang}
 {opt post} posts estimation results in {cmd:e()} for exporting results with pretty table commands
-or testing. The syntax is constrained if this option is specified for multiple combinations
-without {opt covzero}, see {helpb xlincom##remarks:remarks}.
+or testing. 
 
 {phang}
-{opt repost} adds results to the estimates in memory. The syntax is constrained if {opt covzero} is 
-not specified, see {helpb xlincom##remarks:remarks}. If the estimates in memory are from a 
+{opt repost} adds results to the estimates in memory. If the estimates in memory are from a 
 single equation model, the model estimates will be prefixed with equation name "Main" and the linear combinations 
 will be prefixed with equation name "xlincom". In the case of a multiple equation model, the linear combinations will 
 be added with equation name "xlincom". This option is intended to make it easy to make tables combining
 model estimates and linear combinations of these estimates.
 
 {phang}
-{opt covzero} sets covariances to zero which speeds it up by about two times, and the syntax will 
-not be constrained. The transformations should not be tested against other estimates 
+{opt covzero} sets covariances to zero which speeds it up by about two times.
+The transformations should not be tested against other estimates 
 if this option is specified as this will yield invalid results. 
 
 {phang}
@@ -138,24 +133,6 @@ distribution if {cmd:e(df_r)} is missing.
 coefficient estimates as exp(b) rather than b. Only one of these options may be 
 specified. {opt or} is the default after {cmd:logistic}. See {helpb lincom:help lincom} 
 for more information about these options.
-
-
-{marker remarks}{...}
-{title:Remarks}
-
-{pstd} 
-If option {opt post} or {opt repost} is not specified or {opt post} or {opt repost} is 
-specified together with option {opt covzero}, {cmd:xlincom} does not have to calculate covariances 
-and {cmd:xlincom} will accept any syntax that is valid for {helpb lincom:lincom}. However, if 
-covariances need to be calculated, {cmd:xlincom} needs to interpret the equations. {cmd:xlincom} 
-has its own parser to do that, which is not as smart as Stata's inbuilt parser. It will only 
-recognize parameters as they are found in {cmd:e(b)} (type {cmd:matrix list e(b)} after the estimation 
-command to see how parameters are named). Furthermore, it will only accept one multiplication or 
-division per parameter. For example, {cmd:2/3 * mpg} would be invalid. Instead, type {cmd:0.667 * mpg} 
-or {cmd:mpg / 1.5}. Finally, parentheses and multiple subsequent addition/subtraction operators (--, +-, -+)
-are not allowed. It is possible to make use of the unconstrained syntax while still posting results 
-by specifying the {opt covzero} option. In this case the transformations should not be tested against
-other estimates as this will yield invalid results.
 
 
 {marker examples}{...}
