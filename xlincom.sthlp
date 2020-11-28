@@ -85,7 +85,7 @@ as well as covariances in the case of multiple combinations. {helpb nlcom:nlcom}
 but {cmd:xlincom} is much faster and offers the same syntax as {helpb lincom:lincom}. {cmd:xlincom} 
 internally calls {helpb lincom:lincom} for each linear combination and extracts coefficient 
 estimates and variances from its output. Results can be posted or reposted for exporting 
-with pretty table commands or subsequent testing.
+with pretty table commands or testing.
 
 
 {marker options}{...}
