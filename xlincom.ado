@@ -1,7 +1,7 @@
-*! 1.2.6                27nov2020
+*! 1.2.6                28nov2020
 *! Wouter Wakker        wouter.wakker@outlook.com
 
-* 1.2.6     27nov2020   test used to calculate covariances
+* 1.2.6     28nov2020   test used to calculate covariances
 * 1.2.5     13nov2020   repost option supported for most if not all estimation commands
 * 1.2.4     09nov2020   repost option added
 * 1.2.3     07nov2020   estadd option added
@@ -36,8 +36,8 @@ program xlincom, eclass
 		// Only one display option allowed
 		local eformopt : word count `eform' `or' `hr' `shr' `irr' `rrr' 
 		if `eformopt' > 1 {
-				di as error "only one display option can be specified"
-				exit 198
+			di as error "only one display option can be specified"
+			exit 198
 		}
 		
 		// Get additional display options
@@ -95,9 +95,9 @@ program xlincom, eclass
 		local name_eq_list "`s(name_eq_list)'"
 		local n_lc = s(n_lc)
 			
-		// Store b and e(V) matrix
-		tempname b eV
-		mat `b' = e(b)
+		// Store e(b) and e(V) matrix
+		tempname eb eV
+		mat `eb' = e(b)
 		mat `eV' = e(V)
 		local rownames : rowfullnames `eV'
 		local n_eV = rowsof(`eV')
@@ -121,7 +121,7 @@ program xlincom, eclass
 			tempname betarepost vcovrepost
 			mat def `betarepost' = J(1, `n_eV' + `n_lc', 0)
 			mat def `vcovrepost' = J(`n_eV' + `n_lc', `n_eV' + `n_lc', 0)	
-			mat `betarepost'[1,1] = `b'
+			mat `betarepost'[1,1] = `eb'
 			mat `vcovrepost'[1,1] = `eV'
 		}
 		
@@ -139,13 +139,17 @@ program xlincom, eclass
 			
 			// Parse equation, return proper equation for test in case of multiple equation models
 			xlincom_parse_eq_for_test "`eq'"
-			if "`post'`repost'" != "" & "`covzero'" == "" local eqs_for_cov "`eqs_for_cov' (`s(eq_for_test)' = 0)"
+			local eq_for_test "`s(eq_for_test)'"
+			if "`post'`repost'" != "" & "`covzero'" == "" local eqs_for_cov "`eqs_for_cov' (`eq_for_test' = 0)"
 			
-			qui lincom `s(eq_for_test)'
+			// Check if there are no additive constants in equation when eform is specified, lincom will throw an error
+			if `eformopt' > 0 qui lincom `eq_for_test', `eform' `or' `hr' `shr' `irr' `rrr' 
+			
+			qui lincom `eq_for_test'
 			
 			`dont' di as txt %13s abbrev("`name':",13)  _column(16) as res "`eq' = 0"
 			
-			// Get estimates and variances
+			// Get estimate and standard error
 			scalar `estimate' = r(estimate)
 			scalar `se' = r(se)
 			
@@ -174,7 +178,7 @@ program xlincom, eclass
 		// Check if coef doesn't already exist in e(b) for repost
 		if "`repost'" != "" {
 			foreach eqname of local eq_names {
-				if !missing(colnumb(`b', "xlincom:`eqname'")) {
+				if !missing(colnumb(`eb', "xlincom:`eqname'")) {
 					di as error "{bf:xlincom:`eqname'} already exists in {bf:e(b)}"
 					exit 198
 				}
@@ -202,12 +206,12 @@ program xlincom, eclass
 			mat colnames `vcov' = `eq_names'
 		}
 		else {
-			local equations: coleq `b', quoted // Thanks to Ben Jann for these two lines
+			local equations: coleq `eb', quoted // Thanks to Ben Jann for these two lines
 			local equations: subinstr local equations `""_""' `""Main""', all word
 			forval i = 1/`n_lc' {
 				local equations `"`equations' "xlincom""'
 			}
-			local names: colnames `b'
+			local names: colnames `eb'
 			local names `names' `eq_names'
 			mat rownames `betarepost' = y1
 			mat colnames `betarepost' = `names'
@@ -462,7 +466,7 @@ program xlincom_parse_starlevels, sclass
 	sreturn local starl_list "`starl_list'"
 end
 
-// Add local or scalars of results to e()
+// Add results as local or scalar to e()
 program xlincom_estadd, eclass
 	version 8
 	args n_lc names rtable star se t p ci bfmt sefmt tfmt pfmt cifmt left right starlevels

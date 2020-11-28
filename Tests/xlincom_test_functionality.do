@@ -145,6 +145,8 @@ xlincom (mpg), or
 cap noisily xlincom (mpg), or hr
 assert _rc == 198
 xlincom (mpg), or nohead
+cap noisily xlincom mpg + 2, eform
+assert _rc == 198
 
 // Functionality
 

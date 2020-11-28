@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.2.6 27nov2020}{...}
+{* *! version 1.2.6 28nov2020}{...}
 {vieweralsosee "[R] lincom" "mansection R lincom"}{...}
 {vieweralsosee "" "--"}{...}
 {vieweralsosee "[R] nlcom" "help nlcom"}{...}
@@ -83,36 +83,27 @@ the transformation; {it:name} can be any {help reswords:valid Stata name}.
 p-values, and confidence intervals for single or multiple linear combinations of coefficients 
 as well as covariances in the case of multiple combinations. {helpb nlcom:nlcom} can also do this, 
 but {cmd:xlincom} is much faster and offers the same syntax as {helpb lincom:lincom}. {cmd:xlincom} 
-internally calls {helpb lincom:lincom} for each linear combination and extracts 
-estimates and variances from its output.
-
-{pstd}
-If option {opt post} or {opt repost} is specified, estimation results will be posted in {cmd:e()} 
-for exporting with pretty tables commands or subsequent testing. In this case {cmd:xlincom} also calculates 
-covariances by default but this makes it slightly slower. Since {cmd:xlincom} is intended as a fast 
-alternative to {helpb nlcom:nlcom} for linear combinations, the option {opt covzero} may be specified. In 
-this case {cmd:xlincom} does not compute covariances, setting them to zero instead. If covariances are set to 
-zero the estimates of the transformations should not be tested against other estimates as this will
-yield invalid results.
+internally calls {helpb lincom:lincom} for each linear combination and extracts coefficient 
+estimates and variances from its output. Results can be posted or reposted for exporting 
+with pretty table commands or subsequent testing.
 
 
 {marker options}{...}
 {title:Options} 
 
 {phang}
-{opt post} posts estimation results in {cmd:e()} for exporting results with pretty table commands
-or testing. 
+{opt post} posts estimation results in {cmd:e()}.
 
 {phang}
 {opt repost} adds results to the estimates in memory. If the estimates in memory are from a 
 single equation model, the model estimates will be prefixed with equation name "Main" and the linear combinations 
 will be prefixed with equation name "xlincom". In the case of a multiple equation model, the linear combinations will 
-be added with equation name "xlincom". This option is intended to make it easy to make tables combining
-model estimates and linear combinations of these estimates.
+be added with equation name "xlincom". This option is intended to make it easy to create tables combining
+model coefficients and linear combinations of these coefficients.
 
 {phang}
-{opt covzero} sets covariances to zero for speed improvements.
-The transformations should not be tested against other estimates 
+{opt covzero} sets covariances to zero for speed improvements. The 
+transformations should not be tested against other coefficients 
 if this option is specified as this will yield invalid results. 
 
 {phang}
