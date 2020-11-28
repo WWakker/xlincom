@@ -534,4 +534,46 @@ xlincom mpg + foreign, repost
 cap noisily xlincom mpg + foreign, repost
 assert _rc == 198
 
+// Estimation commands for repost
+reg price mpg weight
+xlincom mpg + weight, repost
+
+sureg (price mpg weight) (headroom mpg weight)
+xlincom price:mpg + headroom:weight, repost
+
+webuse grunfeld
+xtreg invest mvalue kstock
+xlincom mvalue + kstock, repost
+
+xtreg invest mvalue kstock, fe
+xlincom mvalue + kstock, repost
+
+webuse lbw
+logit low age lwt i.race smoke ptl ht ui
+xlincom age + lwt, repost
+
+webuse intregxmpl
+intreg wage1 wage2 age c.age#c.age nev_mar rural school tenure
+xlincom age + nev_mar, repost
+
+sysuse auto
+boxcox mpg weight price
+xlincom weight, repost
+
+webuse production
+nl (lnoutput = {b0} - 1/{rho=1}*ln({delta=0.5}*capital^(-1*{rho}) + (1-{delta})*labor^(-1*{rho})))
+xlincom /rho, repost
+
+sysuse auto
+qreg price weight length foreign
+xlincom foreign + length, repost
+
+use http://www.stata-press.com/data/r15/sem_1fmm
+sem (x1 x2 x3 x4 <- X)
+xlincom x3:X + x4:X, repost
+
+webuse lbw
+glm low age lwt i.race smoke ptl ht ui, family(binomial)
+xlincom 1.race + smoke, repost
+
 di "All tests passed"
