@@ -89,7 +89,7 @@ estimates and variances from its output.
 {pstd}
 If option {opt post} or {opt repost} is specified, estimation results will be posted in {cmd:e()} 
 for exporting with pretty tables commands or subsequent testing. In this case {cmd:xlincom} also calculates 
-covariances by default but this makes it about two times slower. Since {cmd:xlincom} is intended as a fast 
+covariances by default but this makes it slightly slower. Since {cmd:xlincom} is intended as a fast 
 alternative to {helpb nlcom:nlcom} for linear combinations, the option {opt covzero} may be specified. In 
 this case {cmd:xlincom} does not compute covariances, setting them to zero instead. If covariances are set to 
 zero the estimates of the transformations should not be tested against other estimates as this will
@@ -111,7 +111,7 @@ be added with equation name "xlincom". This option is intended to make it easy t
 model estimates and linear combinations of these estimates.
 
 {phang}
-{opt covzero} sets covariances to zero which speeds it up by about two times.
+{opt covzero} sets covariances to zero for speed improvements.
 The transformations should not be tested against other estimates 
 if this option is specified as this will yield invalid results. 
 
