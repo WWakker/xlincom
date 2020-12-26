@@ -1,18 +1,17 @@
 v 3
 
 d 'XLINCOM': Multiple linear combinations of parameters
-d xlincom computes point estimates, standard errors, t or z statistics, 
-d p-values, and confidence intervals for multiple linear combinations of 
-d coefficients as well as their covariances. nlcom is also able to do 
-d this, but xlincom is much faster (up to 300 times for complex models). 
-d xlincom internally calls lincom for each linear combination and extracts 
-d estimates and variances from its output. It has an optional post option 
-d to post estimation results for subsequent testing or exporting with 
-d pretty table commands. 
+d xlincom computes point estimates, standard errors, t or z statistics, p-values, and 
+d confidence intervals for single or multiple linear combinations of coefficients as 
+d well as covariances in the case of multiple combinations. nlcom can also do this, 
+d but xlincom is much faster and offers the same syntax as lincom. xlincom internally 
+d calls lincom for each linear combination and extracts coefficient estimates and 
+d variances from its output. Results can be posted or reposted for exporting with 
+d pretty table commands or testing.
 d 
 d Requires: Stata version 8
 d
-d Distribution-Date: 20200505
+d Distribution-Date: 20201128
 d 
 d Author: Wouter Wakker
 d Contact: wouter.wakker@outlook.com
