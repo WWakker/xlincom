@@ -356,7 +356,7 @@ program xlincom_parse_eq_for_test, sclass
 	sreturn local eq_for_test `eq_for_test'
 end
 
-// Parser for estadd option to check of everything is specified properly
+// Parser for estadd option to check if everything is specified properly
 program xlincom_parse_estadd, sclass
 	version 8
 	syntax anything(id="star|nostar") [, SE                      ///
