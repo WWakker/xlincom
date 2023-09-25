@@ -51,13 +51,12 @@ assert _rc == 131
 xlincom ((mpg - 2) / 2)
 xlincom (name1=(mpg - 2) / 2)
 cap noisily xlincom ((name1=mpg - 2) / 2)
-assert _rc == 7
+assert _rc == 132
 cap noisily xlincom name = mpg = weight
 assert _rc == 198
 cap noisily xlincom (name1 name2 = mpg)
 assert _rc == 7
-cap noisily xlincom (1name1 = mpg)
-assert _rc == 7
+xlincom (1name1 = mpg)
 cap noisily xlincom (name= (mpg)
 assert _rc == 198
 xlincom (name= (mpg))

@@ -1,6 +1,7 @@
-*! 1.2.6                28nov2020
+*! 1.2.7                25sep2023
 *! Wouter Wakker        wouter.wakker@outlook.com
 
+* 1.2.7     25sep2023   names check removed at suggestion of NHB
 * 1.2.6     28nov2020   test used to calculate covariances
 * 1.2.5     13nov2020   repost option supported for most if not all estimation commands
 * 1.2.4     09nov2020   repost option added
@@ -315,7 +316,6 @@ program xlincom_parse_name_eq, sclass
 				di as error "{bf:`first'} invalid name"
 				exit 7
 			}
-			confirm names `first'
 			local eq_name `first'
 			gettoken equalsign eq : eq, parse("=")
 		}
